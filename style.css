@@ -1,0 +1,916 @@
+body {
+    font-family: sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+#mode-selection {
+    text-align: center;
+}
+
+#mode-selection button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    margin: 10px;
+    cursor: pointer;
+}
+
+#bp-interface {
+    width: 95%;
+    max-width: 1400px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+
+.hidden {
+    display: none;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+#action-indicator {
+    font-weight: bold;
+    color: #333;
+}
+#current-action {
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    text-align: center;
+    min-width: 80px;
+    line-height: 1.5;
+}
+
+#timer {
+    font-size: 1.1em;
+}
+
+#pending-area {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#pending-champion {
+    min-width: 80px; /* Ensure space even when '无' */
+    text-align: center;
+    font-weight: bold;
+}
+
+#pending-champion img {
+    width: 30px;
+    height: 30px;
+    vertical-align: middle;
+    margin-left: 5px;
+    border: 1px solid #ccc;
+}
+
+#confirm-button {
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+#confirm-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+#empty-ban-button {
+    padding: 8px 15px;
+    cursor: pointer;
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin: 0 10px;
+}
+
+#empty-ban-button:hover {
+    background-color: #e68a00;
+}
+
+#empty-ban-button.hidden {
+    display: none;
+}
+
+#reset-button {
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+.main-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.team-panel {
+    width: 20%;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.blue-team {
+    background-color: #e0f0ff; /* Light blue */
+    border: 1px solid #b3d9ff;
+}
+
+.red-team {
+    background-color: #ffe0e0; /* Light red */
+    border: 1px solid #ffb3b3;
+}
+
+.team-panel h3 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+}
+.team-panel h4 {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+/* Reverse order - Picks on top, Bans on bottom */
+.team-panel .picks {
+    order: 1;
+    flex-grow: 1; /* Makes picks take most of the space */
+    margin-bottom: 20px;
+}
+
+.team-panel .bans {
+    order: 2;
+    margin-top: auto; /* Push bans to bottom */
+}
+
+.slot-container {
+    display: flex;
+    justify-content: center; /* Center items */
+    gap: 5px; /* Spacing between slots */
+    min-height: 55px; /* Ensure container has height even when empty */
+}
+
+/* Default is picks vertical layout */
+.picks .slot-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* Increased gap between slots */
+}
+
+/* Pick slots 3+2 formation with gap in the middle */
+.picks .bp-slot:nth-child(3) {
+    margin-bottom: 20px; /* Add gap after the 3rd pick */
+}
+
+/* Special layout for bans (3+2 formation) */
+.bans .slot-container {
+    flex-wrap: wrap;
+    flex-direction: row;
+    width: 100%;
+    max-width: 180px; /* Limit width for proper wrapping */
+    margin: 0 auto; /* Center the container */
+    justify-content: flex-start; /* Start from left */
+}
+
+/* First 3 slots (top row) */
+.bans .bp-slot:nth-child(1),
+.bans .bp-slot:nth-child(2),
+.bans .bp-slot:nth-child(3) {
+    flex: 0 0 auto;
+    margin-bottom: 5px;
+}
+
+/* Last 2 slots (bottom row) - centered */
+.bans .bp-slot:nth-child(4),
+.bans .bp-slot:nth-child(5) {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Force second row to center */
+.bans .slot-container::after {
+    content: "";
+    flex: auto;
+}
+
+.bp-slot {
+    width: 50px;
+    height: 50px;
+    border: 1px dashed #aaa;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7em;
+    color: #888;
+    overflow: hidden; /* Hide overflow if image is slightly larger */
+}
+
+.bp-slot img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+}
+
+/* Empty Ban Style */
+.bp-slot.empty-ban {
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    background-color: #f0f0f0;
+    border: 1px dashed #999;
+}
+
+.champion-pool-container {
+    width: 55%; /* Take up the middle space */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 10px;
+}
+
+#search-box {
+    width: 80%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 标签过滤器容器 */
+.tag-filter-container {
+    width: 95%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+
+/* 标签过滤按钮 */
+.tag-filter-button {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.tag-filter-button:hover {
+    background-color: #f0f0f0;
+    border-color: #999;
+}
+
+.tag-filter-button.active {
+    background-color: #4a90e2;
+    color: white;
+    border-color: #4a90e2;
+}
+
+/* 小屏幕上标签过滤按钮的样式 */
+@media (max-width: 768px) {
+    .tag-filter-container {
+        width: 100%;
+        padding: 8px 5px;
+        gap: 5px;
+    }
+    
+    .tag-filter-button {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+#champion-pool {
+    width: 100%;
+    height: 400px; /* 固定高度 */
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-auto-rows: 60px;
+    gap: 10px;
+    justify-content: center;
+    padding: 15px;
+    border: 1px solid #eee;
+    background-color: #fdfdfd;
+    max-width: 700px; /* 限制最大宽度，约为10个英雄的宽度加间距 */
+    margin: 0 auto;
+}
+
+/* 在小屏幕上减少每行显示的英雄数量 */
+@media (max-width: 768px) {
+    #champion-pool {
+        max-width: 100%;
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        grid-auto-rows: 50px;
+        gap: 5px;
+    }
+    
+    .champion-item {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Champion display styles */
+.champion-item {
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    position: relative; /* For potential overlays */
+}
+
+.champion-item:hover {
+    transform: scale(1.1);
+    border-color: #aaa;
+}
+
+/* Add style for pending selection */
+.champion-item.pending {
+    border: 2px solid gold;
+    transform: scale(1.05); /* Slightly larger */
+    box-shadow: 0 0 10px gold;
+}
+
+.champion-item img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Observer Mode */
+.observer-mode .champion-item {
+    cursor: default; /* No pointer for observers */
+}
+
+/* Observer Notice */
+#observer-notice, #referee-notice {
+    background-color: rgba(255, 255, 0, 0.2);
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin: 0 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+#referee-notice {
+    background-color: rgba(255, 165, 0, 0.2); /* 裁判使用橙色背景 */
+}
+
+/* 裁判模式样式 */
+.referee-mode .champion-item {
+    cursor: pointer; /* 裁判可以点击所有英雄 */
+}
+
+.champion-item.system-banned {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(80%);
+    position: relative;
+}
+
+.champion-item.system-banned::after {
+    content: '⚠'; /* 警告符号 */
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    color: #ff8c00; /* 橙色 */
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* 系统禁用英雄区域 */
+.system-banned-section {
+    width: 100%;
+    padding: 15px;
+    background-color: #fff6e9; /* 淡橙色背景 */
+    border-top: 1px solid #ffcc80;
+    margin-top: 20px;
+}
+
+.system-banned-section h4 {
+    text-align: center;
+    margin: 0 0 10px 0;
+    color: #e65100;
+    font-size: 16px;
+}
+
+.system-banned-champions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: 50px;
+}
+
+.system-banned-item {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.system-banned-item img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.referee-can-unban {
+    cursor: pointer;
+    position: relative;
+}
+
+.referee-can-unban:hover::before {
+    content: '✖';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 0, 0, 0.3);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.empty-message {
+    color: #999;
+    text-align: center;
+    width: 100%;
+    padding: 10px;
+    font-style: italic;
+}
+
+/* Share Links Container */
+.share-links-container {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.share-links-container h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+}
+
+.share-link {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.share-link strong {
+    margin-right: 10px;
+    min-width: 120px;
+}
+
+.share-link input {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-right: 10px;
+    font-size: 0.8em;
+}
+
+.share-link button {
+    padding: 5px 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.share-link button:hover {
+    background-color: #45a049;
+}
+
+/* States for champions in the pool */
+.champion-item.banned,
+.champion-item.picked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(80%);
+}
+.champion-item.banned::after,
+.champion-item.picked::after {
+ content: 'X'; /* Or use a background image */
+ position: absolute;
+ top: 0; left: 0; right: 0; bottom: 0;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ font-size: 2em;
+ color: red;
+ font-weight: bold;
+ background-color: rgba(0, 0, 0, 0.1); /* Optional overlay */
+}
+
+/* 无匹配结果消息样式 */
+.no-results-message {
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+    background-color: #f8f8f8;
+    border-radius: 5px;
+    margin-top: 20px;
+    grid-column: 1 / -1; /* 横跨所有列 */
+}
+
+/* Action Indicator Colors */
+.blue-turn { background-color: #aaccff; color: #003366;}
+.red-turn { background-color: #ffaaaa; color: #660000;}
+
+/* Game Selection Styles */
+#game-selection {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.game-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.game-buttons button {
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.game-buttons button:hover {
+    background-color: #3a80d2;
+    transform: translateY(-2px);
+}
+
+.back-button {
+    margin-top: 20px;
+}
+
+.back-button button {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.back-button button:hover {
+    background-color: #e0e0e0;
+}
+
+/* Game Indicator Styles */
+#game-indicator {
+    background-color: #2c5282;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin: 0 10px;
+    font-weight: bold;
+}
+
+/* Previous Games Selected Champions */
+.previous-games-info {
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f0f8ff;
+    border: 1px solid #d0e4fe;
+    border-radius: 5px;
+}
+
+.previous-games-info h4 {
+    margin: 5px 0;
+    color: #2c5282;
+}
+
+.previous-games-champions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.previous-games-champion {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #ccc;
+}
+
+.previous-games-champion img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.game-label {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #4a90e2;
+    color: white;
+    font-size: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 全局会话信息显示区域 */
+.global-session-info {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.global-session-info h4 {
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.global-session-info h5 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.global-session-info .session-id {
+    font-family: monospace;
+    background-color: #eee;
+    padding: 3px 6px;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+
+.global-session-info .no-session {
+    color: #999;
+    font-style: italic;
+}
+
+.game-session-item {
+    margin: 10px 0;
+    padding: 8px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.copy-button {
+    padding: 4px 8px;
+    font-size: 0.9em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.copy-button:hover {
+    background-color: #45a049;
+}
+
+.open-button {
+    padding: 4px 8px;
+    font-size: 0.9em;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.open-button:hover {
+    background-color: #0b7dda;
+}
+
+/* 分发页面样式 */
+.distribute-page {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.distribute-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.distribute-header h2 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.distribute-header .session-id {
+    font-family: monospace;
+    font-weight: bold;
+    background-color: #eee;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.distribute-links h3 {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.role-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.role-link-box {
+    width: 45%;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+}
+
+.role-header {
+    padding: 10px;
+    color: white;
+    text-align: center;
+}
+
+.role-header h4 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.role-link {
+    display: flex;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.role-link input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.role-actions {
+    display: flex;
+    padding: 10px;
+    justify-content: space-between;
+}
+
+.copy-button, .qrcode-button {
+    margin-left: 8px;
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s;
+}
+
+.copy-button:hover, .qrcode-button:hover {
+    background-color: #e0e0e0;
+}
+
+.open-button {
+    text-decoration: none;
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 12px;
+    transition: background-color 0.2s;
+}
+
+.open-button:hover {
+    background-color: #e0e0e0;
+}
+
+.distribute-buttons {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.primary-button {
+    padding: 10px 20px;
+    background-color: #1976D2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.secondary-button {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.primary-button:hover {
+    background-color: #1565C0;
+}
+
+.secondary-button:hover {
+    background-color: #e0e0e0;
+}
+
+.error-message {
+    text-align: center;
+    padding: 20px;
+}
+
+.error-message h3 {
+    color: #D32F2F;
+    margin-bottom: 10px;
+}
+
+.error-message p {
+    margin-bottom: 20px;
+}

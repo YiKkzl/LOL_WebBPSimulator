@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YiKk_LOLBP</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="mode-selection">
+        <h1>选择模式</h1>
+        <button onclick="showGameSelection('global')">全局 BP 模式</button>
+        <button onclick="startGame('competitive')">竞技征召 BP</button>
+    </div>
+
+    <div id="game-selection" class="hidden">
+        <h1>选择对局</h1>
+        <div class="game-buttons">
+            <button onclick="startGlobalGame(1)">Game 1</button>
+            <button onclick="startGlobalGame(2)">Game 2</button>
+            <button onclick="startGlobalGame(3)">Game 3</button>
+            <button onclick="startGlobalGame(4)">Game 4</button>
+            <button onclick="startGlobalGame(5)">Game 5</button>
+        </div>
+        <div class="back-button">
+            <button onclick="backToModeSelection()">返回</button>
+        </div>
+    </div>
+
+    <div id="bp-interface" class="hidden">
+        <div class="top-bar">
+            <h2 id="mode-title"></h2>
+            <div id="game-indicator" class="hidden">当前对局: <span id="current-game">Game 1</span></div>
+            <div id="action-indicator">轮到：<span id="current-action">---</span></div>
+            <div id="pending-area">待选：<span id="pending-champion">无</span></div>
+            <button id="confirm-button" onclick="confirmSelection()" disabled>确认选择</button>
+            <button id="empty-ban-button" onclick="emptyBanSelection()" class="hidden">空 Ban</button>
+            <div id="timer">计时: <span id="timer-value">30</span>s</div>
+            <button id="reset-button" onclick="resetUI()">返回模式选择</button>
+        </div>
+
+        <div class="main-content">
+            <!-- Blue Team Panel -->
+            <div class="team-panel blue-team">
+                <h3>蓝方</h3>
+                <div class="picks">
+                    <h4>选用 (Picks)</h4>
+                    <div class="slot-container" id="blue-picks">
+                        <!-- Pick slots will be generated here -->
+                    </div>
+                </div>
+                <div class="bans">
+                    <h4>禁用 (Bans)</h4>
+                    <div class="slot-container" id="blue-bans">
+                        <!-- Ban slots will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Champion Pool -->
+            <div class="champion-pool-container">
+                 <input type="text" id="search-box" placeholder="搜索英雄..." oninput="filterChampions()">
+                 <div id="champion-pool">
+                     <!-- Champions will be loaded here -->
+                 </div>
+            </div>
+
+            <!-- Red Team Panel -->
+            <div class="team-panel red-team">
+                 <h3>红方</h3>
+                 <div class="picks">
+                     <h4>选用 (Picks)</h4>
+                     <div class="slot-container" id="red-picks">
+                         <!-- Pick slots will be generated here -->
+                     </div>
+                 </div>
+                 <div class="bans">
+                     <h4>禁用 (Bans)</h4>
+                     <div class="slot-container" id="red-bans">
+                         <!-- Ban slots will be generated here -->
+                     </div>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
