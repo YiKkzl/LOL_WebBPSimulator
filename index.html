@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YiKk_LOLBP</title>
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.1">
 </head>
 <body>
 
-    <div id="mode-selection">
-        <h1>选择模式</h1>
-        <button onclick="showGameSelection('global')">全局 BP 模式</button>
-        <button onclick="startGame('competitive')">竞技征召 BP</button>
+    <div id="initial-screen-container">
+        <h1 id="main-title">YiKkBP模拟器</h1>
+        <div id="mode-selection">
+            <h2>选择模式</h2>
+            <button onclick="showGameSelection('global')">全局 BP 模式</button>
+            <button onclick="startGame('competitive')">竞技征召 BP</button>
+        </div>
     </div>
 
     <div id="game-selection" class="hidden">

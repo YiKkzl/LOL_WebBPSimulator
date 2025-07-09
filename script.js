@@ -46,6 +46,7 @@ const API_BASE_URL = '/api.php'; // 相对路径，确保API文件在正确位�
 // --- DOM Elements ---
 const modeSelectionDiv = document.getElementById('mode-selection');
 const bpInterfaceDiv = document.getElementById('bp-interface');
+const initialScreenContainer = document.getElementById('initial-screen-container'); // 新增：获取初始屏幕容器
 const modeTitleEl = document.getElementById('mode-title');
 const currentActionEl = document.getElementById('current-action');
 const timerValueEl = document.getElementById('timer-value');
@@ -76,6 +77,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Check if we need to directly start a global game or show distribution page
     checkDistributePage();
+    
+    // 性能优化：为英雄池添加事件委托
+    championPoolDiv.addEventListener('click', handleChampionPoolClick);
+    
+    // 需求：创建通过ID观战的UI
+    createObserverJoinUI();
+    
+    // 需求：修改按钮颜色
+    applyCustomButtonStyles();
     
     // Log status for debugging
     console.log("Champion data loaded.");
@@ -264,7 +274,7 @@ async function joinSession(session, role) {
         
         // 失败时重置状态并显示模式选择
         resetSessionState();
-        modeSelectionDiv.classList.remove('hidden');
+        initialScreenContainer.classList.remove('hidden'); // 修复：显示整个初始屏幕
     }
 }
 
@@ -380,7 +390,7 @@ async function loadSessionData() {
         pickedChampions = new Set([...bluePicks, ...redPicks]);
         
         // Enter BP interface
-        modeSelectionDiv.classList.add('hidden');
+        initialScreenContainer.classList.add('hidden'); // 修复：隐藏整个初始屏幕
         bpInterfaceDiv.classList.remove('hidden');
         
         // Setup UI elements based on mode
@@ -466,6 +476,26 @@ function setupRoleUI() {
     // Hide mode selection for non-hosts
     if (userRole !== 'host') {
         modeSelectionDiv.classList.add('hidden');
+        
+        // 需求1：为红蓝队长修改重置按钮的行为和样式
+        const resetButton = document.querySelector('button[onclick="resetUI()"]');
+        if (resetButton) {
+            if (userRole === 'blue') {
+                resetButton.textContent = '你是蓝方队长';
+                resetButton.style.backgroundColor = '#1E88E5'; // Blue color
+                resetButton.onclick = () => { 
+                    console.log("蓝方队长点击了刷新按钮");
+                    loadSessionData(); // 重新获取当前阶段信息
+                };
+            } else if (userRole === 'red') {
+                resetButton.textContent = '你是红方队长';
+                resetButton.style.backgroundColor = '#E53935'; // Red color
+                resetButton.onclick = () => { 
+                    console.log("红方队长点击了刷新按钮");
+                    loadSessionData(); // 重新获取当前阶段信息
+                };
+            }
+        }
         
         // 裁判权限 - 可以随时禁用英雄
         if (userRole === 'referee') {
@@ -827,24 +857,29 @@ function updatePanelSlots(containerId, championsArray, slotType) {
         console.error(`找不到容器: ${containerId}`);
         return;
     }
-    
-    // 观战模式调试信息
-    if (userRole === 'observer') {
-        console.log(`观战模式更新 ${containerId}:`, championsArray);
-    }
-    
-    // 清空容器
-    clearSlots(container);
-    
-    // 创建槽位
+
     const prefix = containerId.replace('s', '-'); // 例如：blue-bans -> blue-ban
-    createSlots(container, 5, prefix);
-    
-    // 更新槽位
-    championsArray.forEach((championId, index) => {
-        const slotId = `${prefix}-${index}`;
-        const slot = document.getElementById(slotId);
-        if (slot) {
+    const totalSlots = 5;
+
+    // 性能优化：确保槽位存在，如果不存在则创建，而不是每次都重建
+    if (container.childElementCount !== totalSlots) {
+        clearSlots(container);
+        createSlots(container, totalSlots, prefix);
+    }
+
+    // 性能优化：遍历并更新现有槽位，而不是销毁重建
+    for (let i = 0; i < totalSlots; i++) {
+        const slot = container.children[i];
+        if (!slot) continue;
+
+        const championId = championsArray[i];
+
+        // 重置槽位状态
+        slot.innerHTML = '';
+        slot.className = 'bp-slot'; 
+        
+        if (championId) {
+            // 如果有英雄ID，填充槽位
             if (slotType === 'ban' && championId.startsWith('EmptyBan_')) {
                 // 这是一个空禁用
                 slot.textContent = '空';
@@ -853,9 +888,11 @@ function updatePanelSlots(containerId, championsArray, slotType) {
                 updateSlotWithChampion(slot, championId);
             }
         } else {
-            console.error(`找不到槽位: ${slotId}`);
+            // 如果没有英雄ID，显示占位符
+            const placeholder = prefix.includes('ban') ? 'B' : 'P';
+            slot.textContent = `${placeholder}${i + 1}`;
         }
-    });
+    }
 }
 
 // 更新槽位，添加英雄图片
@@ -906,7 +943,7 @@ async function startGame(mode) {
         isSessionActive = true;
     }
     
-    modeSelectionDiv.classList.add('hidden');
+    initialScreenContainer.classList.add('hidden'); // 隐藏整个初始屏幕
     bpInterfaceDiv.classList.remove('hidden');
     
     // 隐藏游戏指示器
@@ -1095,6 +1132,9 @@ async function confirmSelection() {
     updateAllUI();
 
     // Reset pending state
+    const oldPendingItem = championPoolDiv.querySelector(`.champion-item[data-id="${pendingChampionId}"]`);
+    if(oldPendingItem) oldPendingItem.classList.remove('pending');
+    
     pendingChampionId = null;
     updatePendingChampionUI();
     confirmButtonEl.disabled = true;
@@ -1181,7 +1221,7 @@ function resetGameStates() {
 // 恢复重置UI的函数
 function resetUI() {
     stopTimer();
-    modeSelectionDiv.classList.remove('hidden');
+    initialScreenContainer.classList.remove('hidden'); // 显示初始屏幕
     bpInterfaceDiv.classList.add('hidden');
     gameSelectionDiv.classList.add('hidden');
     gameIndicatorDiv.classList.add('hidden');
@@ -1403,11 +1443,8 @@ function renderChampionPool() {
         const existingItem = existingItems.get(champ.id);
         
         if (existingItem) {
-            // 检查状态是否需要更新
-            const shouldUpdate = updateChampionItemState(existingItem, champ.id);
-            if (shouldUpdate) {
-                itemsToUpdate.push(existingItem);
-            }
+            // 性能优化：直接更新状态，不再检查返回值或使用无效的 shouldUpdate 变量
+            updateChampionItemState(existingItem, champ.id);
             
             // 从已存在的项中移除，剩下的就是需要删除的
             existingItems.delete(champ.id);
@@ -1455,58 +1492,42 @@ function createChampionItem(champ) {
     return champDiv;
 }
 
-// 更新英雄项状态的辅助函数
+// 性能优化：重构 updateChampionItemState，移除昂贵的DOM操作和事件处理
 function updateChampionItemState(champDiv, championId) {
-    const oldClasses = champDiv.className;
-    
-    // 清除所有状态类
-    champDiv.classList.remove('system-banned', 'banned', 'picked', 'pending', 'referee-can-ban', 'referee-can-unban');
-    
-    // 移除所有事件监听器
-    const newChampDiv = champDiv.cloneNode(true);
-    champDiv.parentNode?.replaceChild(newChampDiv, champDiv);
-    champDiv = newChampDiv;
+    // 此函数现在只负责视觉状态（CSS类）。
+    // 事件处理通过父容器上的事件委托完成。
 
-    // 系统禁用优先级最高
+    // 清除所有可能的状态类，以便重新应用正确的状态
+    champDiv.classList.remove('system-banned', 'banned', 'picked', 'pending', 'referee-can-ban');
+
+    // 移除或管理系统禁用图标
+    const systemBanIcon = champDiv.querySelector('.system-ban-icon');
+
+    // 按优先级应用状态
     if (systemBannedChampions.includes(championId)) {
         champDiv.classList.add('system-banned');
-        
-        // 添加系统禁用图标（如果不存在）
-        if (!champDiv.querySelector('.system-ban-icon')) {
+        if (!systemBanIcon) {
             const banIcon = document.createElement('div');
             banIcon.className = 'system-ban-icon';
             banIcon.innerHTML = '<i class="fas fa-ban"></i>';
             champDiv.appendChild(banIcon);
         }
-        
-        // 裁判可以点击解除系统禁用
-        if (userRole === 'referee') {
-            champDiv.addEventListener('click', () => toggleSystemBan(championId));
-        }
-    }
-    else if (bannedChampions.has(championId)) {
-        champDiv.classList.add('banned');
-    } 
-    else if (pickedChampions.has(championId)) {
-        champDiv.classList.add('picked');
-    } 
-    else if (championId === pendingChampionId) {
-        champDiv.classList.add('pending');
-    } 
-    else {
-        // 裁判可以直接点击英雄进行系统禁用
-        if (userRole === 'referee') {
-            champDiv.classList.add('referee-can-ban');
-            champDiv.addEventListener('click', () => toggleSystemBan(championId));
-        } 
-        // 蓝红队长在轮到自己时可以选择英雄
-        else if (canUserMakeMove()) {
-            champDiv.addEventListener('click', () => handleChampionSelect(championId));
-        }
-    }
+    } else {
+        if (systemBanIcon) systemBanIcon.remove(); // 确保非系统禁用时图标被移除
 
-    // 返回是否状态发生了变化
-    return champDiv.className !== oldClasses;
+        if (bannedChampions.has(championId)) {
+            champDiv.classList.add('banned');
+        } else if (pickedChampions.has(championId)) {
+            champDiv.classList.add('picked');
+        } else if (championId === pendingChampionId) {
+            champDiv.classList.add('pending');
+        } else {
+            // 如果是裁判模式且英雄可用，显示可禁用状态
+            if (userRole === 'referee') {
+                champDiv.classList.add('referee-can-ban');
+            }
+        }
+    }
 }
 
 function updateSlotUI(championId) {
@@ -1538,28 +1559,6 @@ function updateSlotUI(championId) {
     }
 }
 
-function updateChampionPoolItemState(championId, type) {
-    const item = championPoolDiv.querySelector(`.champion-item[data-id="${championId}"]`);
-    if (item) {
-        // Remove previous state classes first
-        item.classList.remove('banned', 'picked', 'pending');
-
-        if (type === 'ban') {
-            item.classList.add('banned');
-        // Remove click listener to prevent re-selection
-        item.replaceWith(item.cloneNode(true)); // Simple way to remove listeners
-        } else if (type === 'pick') {
-            item.classList.add('picked');
-        // Remove click listener to prevent re-selection
-        item.replaceWith(item.cloneNode(true)); // Simple way to remove listeners
-        } else if (type === 'pending') {
-            item.classList.add('pending');
-        } else if (type === 'clearPending') {
-             // Just removes the pending class (handled by classList.remove above)
-        }
-    }
-}
-
 function determineNextAction() {
     stopTimer(); // Stop previous timer before starting next step
     
@@ -1582,7 +1581,7 @@ function determineNextAction() {
          confirmButtonEl.disabled = true;
          // Reset pending state visually as well, just in case
          if (pendingChampionId) {
-             updateChampionPoolItemState(pendingChampionId, 'clearPending');
+             // 性能优化：此处的 pending 状态将由后续的 updateAllUI 自动处理，无需手动清除
          }
          pendingChampionId = null;
          updatePendingChampionUI();
@@ -1926,8 +1925,8 @@ function updateSlotWithEmptyBan() {
 // --- Game Selection Functions ---
 function showGameSelection(mode) {
     if (mode === 'global') {
-        // 隐藏模式选择，显示游戏选择
-        modeSelectionDiv.classList.add('hidden');
+        // 隐藏初始屏幕，显示游戏选择
+        initialScreenContainer.classList.add('hidden');
         gameSelectionDiv.classList.remove('hidden');
         
         // 初始化全局模式
@@ -2666,7 +2665,7 @@ function updateGameSelectionButtons() {
 
 function backToModeSelection() {
     gameSelectionDiv.classList.add('hidden');
-    modeSelectionDiv.classList.remove('hidden');
+    initialScreenContainer.classList.remove('hidden'); // 显示初始屏幕
 }
 
 // 添加缓存变量和配置
@@ -3133,11 +3132,12 @@ async function updateGameSessionsDisplay() {
                     // 已有会话ID
                     gameSessionDiv.innerHTML = `<strong>Game ${i}:</strong> <span class="session-id">${sessionId}</span>`;
                     
-                    // 添加在新标签打开的链接
+                    // 需求2：修改按钮，使其打开链接分发页面
                     const openBtn = document.createElement('a');
-                    openBtn.textContent = '在新标签打开';
+                    openBtn.textContent = '打开链接分发';
                     openBtn.className = 'open-button';
-                    openBtn.href = `${window.location.href.split('?')[0]}?session=${sessionId}&role=host`;
+                    // 构造分发页面的URL
+                    openBtn.href = `${window.location.href.split('?')[0]}?mode=distribute&game=${i}&global_session=${globalModeSessionId}`;
                     openBtn.target = '_blank';
                     gameSessionDiv.appendChild(openBtn);
                     
@@ -3188,4 +3188,172 @@ function resetSessionState() {
     globalModeSessionId = null;
     currentGameNumber = 0;
     console.log("会话状态已重置");
+}
+
+// 性能优化：新增的中央事件处理器
+function handleChampionPoolClick(event) {
+    const champDiv = event.target.closest('.champion-item');
+    if (!champDiv || !champDiv.dataset.id) return;
+
+    const championId = champDiv.dataset.id;
+
+    // --- 裁判逻辑 ---
+    // 裁判可以随时切换系统禁用状态
+    if (userRole === 'referee') {
+        toggleSystemBan(championId);
+        return;
+    }
+
+    // --- 玩家逻辑 ---
+    // 如果不是该玩家的回合或是观察者，则不执行任何操作
+    if (!canUserMakeMove()) {
+        return;
+    }
+    
+    // 如果BP流程尚未开始，不执行任何操作
+    if (!whosTurn || !actionType) {
+        console.warn("No action defined yet.");
+        return;
+    }
+
+    // 忽略对已被禁用/选择的英雄的点击
+    if (bannedChampions.has(championId) || pickedChampions.has(championId)) {
+        console.warn("Champion already selected/banned:", championId);
+        return;
+    }
+    
+    // --- 处理英雄预选 ---
+    // 清除上一个预选英雄的样式
+    if (pendingChampionId) {
+        const oldPendingItem = championPoolDiv.querySelector(`.champion-item[data-id="${pendingChampionId}"]`);
+        if(oldPendingItem) oldPendingItem.classList.remove('pending');
+    }
+
+    // 设置新的预选英雄
+    pendingChampionId = championId;
+    console.log("Pending selection:", pendingChampionId);
+
+    // 更新预选区域的UI显示
+    updatePendingChampionUI();
+
+    // 为新的预选英雄添加样式
+    champDiv.classList.add('pending');
+
+    // 启用确认按钮
+    confirmButtonEl.disabled = false;
+}
+
+// --- New Function to Create Observer Join UI ---
+function createObserverJoinUI() {
+    if (!modeSelectionDiv) return;
+
+    const observerDiv = document.createElement('div');
+    observerDiv.className = 'observer-join-section';
+    observerDiv.style.marginTop = '30px';
+    observerDiv.style.paddingTop = '20px';
+    observerDiv.style.borderTop = '1px solid var(--border-color)';
+
+    const title = document.createElement('h3');
+    title.textContent = '通过ID进入观战';
+    observerDiv.appendChild(title);
+
+    const inputContainer = document.createElement('div');
+    inputContainer.style.display = 'flex';
+    inputContainer.style.gap = '10px';
+    inputContainer.style.alignItems = 'center';
+
+    const sessionIdInput = document.createElement('input');
+    sessionIdInput.type = 'text';
+    sessionIdInput.id = 'observer-session-id-input';
+    sessionIdInput.placeholder = '输入对局ID...';
+    sessionIdInput.style.flexGrow = '1';
+    sessionIdInput.style.padding = '10px';
+    sessionIdInput.style.border = '1px solid var(--border-color)';
+    sessionIdInput.style.backgroundColor = 'var(--panel-bg)';
+    sessionIdInput.style.color = 'var(--text-color)';
+    sessionIdInput.style.borderRadius = '4px';
+
+    const joinButton = document.createElement('button');
+    joinButton.textContent = '观战';
+    joinButton.onclick = async () => {
+        const sessionId = sessionIdInput.value.trim();
+        if (!sessionId) {
+            alert('请输入对局ID。');
+            return;
+        }
+
+        try {
+            // Pre-fetch session data to check for validity and type
+            const response = await fetch(`${API_BASE_URL}?action=getSession&session_id=${sessionId}`);
+            if (!response.ok) {
+                 throw new Error(`无法连接服务器或找不到对局 (HTTP ${response.status})`);
+            }
+            const responseData = await response.json();
+
+            if (responseData.status === 'success' && responseData.data) {
+                const data = responseData.data;
+                const baseUrl = window.location.href.split('?')[0];
+                let url;
+                
+                if (data.global_session_id && data.game_number) {
+                    console.log(`发现全局对局，游戏编号 ${data.game_number}。正在跳转...`);
+                    url = `${baseUrl}?session=${sessionId}&role=observer&game=${data.game_number}&global_session=${data.global_session_id}`;
+                } else {
+                    console.log("发现常规对局。正在跳转...");
+                    url = `${baseUrl}?session=${sessionId}&role=observer`;
+                }
+                window.location.href = url;
+            } else {
+                throw new Error(responseData.message || '无法获取对局信息，请检查ID是否正确。');
+            }
+        } catch (error) {
+            console.error("加入观战失败:", error);
+            alert(`加入观战失败: ${error.message}`);
+        }
+    };
+
+    inputContainer.appendChild(sessionIdInput);
+    inputContainer.appendChild(joinButton);
+    observerDiv.appendChild(inputContainer);
+
+    modeSelectionDiv.appendChild(observerDiv);
+}
+
+// --- New function to apply custom button styles ---
+function applyCustomButtonStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        #confirm-button {
+            background-color: #82b948 !important; /* 新的绿色 */
+            border-color: #82b948 !important;
+            padding: 12px 24px !important; /* 增大按钮 */
+            font-size: 16px !important;
+            min-width: 120px; /* 确保最小宽度 */
+        }
+        #confirm-button:hover:not(:disabled) {
+            background-color: #6f9e3c !important; /* 稍深的绿色 */
+            border-color: #6f9e3c !important;
+        }
+        #empty-ban-button {
+            background-color: #95a5a6 !important; /* 灰色 */
+            border-color: #95a5a6 !important;
+        }
+        #empty-ban-button:hover:not(:disabled) {
+            background-color: #7f8c8d !important;
+            border-color: #7f8c8d !important;
+        }
+
+        /* 需求2：让ID输入框更显眼 */
+        #observer-session-id-input {
+            border: 2px solid #FFC107 !important; /* 使用一个明确的亮色，避免变量问题 */
+            box-shadow: 0 0 5px -2px #FFC107;
+            transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        #observer-session-id-input:focus {
+            outline: none;
+            box-shadow: 0 0 8px 0px #FFC107;
+            border-color: #FFC107 !important;
+        }
+    `;
+    document.head.appendChild(style);
 }

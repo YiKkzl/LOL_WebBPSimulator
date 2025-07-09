@@ -1,11 +1,100 @@
 body {
-    font-family: sans-serif;
-    background-color: #f0f0f0;
+    font-family: 'Helvetica Neue', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', 'Microsoft Yahei', sans-serif;
+    background-color: #1a1a1a; /* 深色背景 */
+    color: #f0f0f0; /* 亮色文字 */
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
+}
+
+/* 初始界面容器 */
+#initial-screen-container {
+    text-align: center;
+    background-color: #242424; /* 面板背景色 */
+    padding: 40px 60px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid #333;
+    transition: all 0.3s ease;
+}
+
+#initial-screen-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* 主标题 */
+#main-title {
+    font-size: 3em;
+    font-weight: 700;
+    color: #82b948; /* 草绿色高亮 */
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(130, 185, 72, 0.5);
+}
+
+#mode-selection h2 {
+    font-size: 1.5em;
+    color: #ccc;
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+
+#mode-selection button {
+    background: linear-gradient(145deg, #3a3a3a, #1f1f1f);
+    color: #f0f0f0;
+    border: 1px solid #444;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+#mode-selection button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(145deg, #82b948, #6f9e3c);
+    color: #fff;
+    border-color: #82b948;
+    box-shadow: 0 6px 20px rgba(130, 185, 72, 0.4);
+}
+
+/* 观战区域的美化 */
+.observer-join-section {
+    margin-top: 40px !important;
+    padding-top: 30px !important;
+    border-top: 1px solid #444 !important;
+}
+
+.observer-join-section h3 {
+    color: #ccc;
+    font-weight: 300;
+    margin-bottom: 20px;
+}
+
+.observer-join-section input {
+    background-color: #1a1a1a !important;
+    color: #f0f0f0 !important;
+}
+
+.observer-join-section button {
+    background: #555;
+    color: #f0f0f0;
+    border: 1px solid #666;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+.observer-join-section button:hover {
+    background: #82b948;
+    color: #111;
+    border-color: #82b948;
 }
 
 #mode-selection {
@@ -22,11 +111,12 @@ body {
 #bp-interface {
     width: 95%;
     max-width: 1400px;
-    background-color: #fff;
+    background-color: #242424; /* 深色背景 */
+    color: #f0f0f0; /* 亮色文字 */
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     padding: 20px;
-    border: 1px solid #ccc;
+    border: 1px solid #333;
 }
 
 .hidden {
@@ -39,12 +129,12 @@ body {
     align-items: center;
     padding-bottom: 15px;
     margin-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #333; /* 深色边框 */
 }
 
 #action-indicator {
     font-weight: bold;
-    color: #333;
+    color: #f0f0f0; /* 亮色文字 */
 }
 #current-action {
     padding: 3px 8px;
@@ -110,6 +200,14 @@ body {
 #reset-button {
     padding: 8px 15px;
     cursor: pointer;
+    background-color: #555;
+    color: #f0f0f0;
+    border: 1px solid #666;
+    border-radius: 4px;
+}
+
+#reset-button:hover {
+    background-color: #666;
 }
 
 .main-content {
@@ -126,13 +224,13 @@ body {
 }
 
 .blue-team {
-    background-color: #e0f0ff; /* Light blue */
-    border: 1px solid #b3d9ff;
+    background-color: rgba(30, 136, 229, 0.1); /* 深蓝背景 */
+    border: 1px solid rgba(30, 136, 229, 0.3);
 }
 
 .red-team {
-    background-color: #ffe0e0; /* Light red */
-    border: 1px solid #ffb3b3;
+    background-color: rgba(229, 57, 53, 0.1); /* 深红背景 */
+    border: 1px solid rgba(229, 57, 53, 0.3);
 }
 
 .team-panel h3 {
@@ -140,11 +238,11 @@ body {
     margin-top: 0;
     margin-bottom: 15px;
     padding-bottom: 5px;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #444; /* 深色边框 */
 }
 .team-panel h4 {
     font-size: 0.9em;
-    color: #555;
+    color: #ccc; /* 浅灰色文字 */
     margin-bottom: 8px;
     text-align: center;
 }
@@ -214,8 +312,8 @@ body {
 .bp-slot {
     width: 50px;
     height: 50px;
-    border: 1px dashed #aaa;
-    background-color: #f9f9f9;
+    border: 1px dashed #555; /* 深色虚线 */
+    background-color: #1f1f1f; /* 更深的背景 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -236,9 +334,9 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #999;
-    background-color: #f0f0f0;
-    border: 1px dashed #999;
+    color: #777;
+    background-color: #2a2a2a;
+    border: 1px dashed #555;
 }
 
 .champion-pool-container {
@@ -253,8 +351,10 @@ body {
     width: 80%;
     padding: 8px;
     margin-bottom: 15px;
-    border: 1px solid #ccc;
+    border: 1px solid #444;
     border-radius: 4px;
+    background-color: #1a1a1a;
+    color: #f0f0f0;
 }
 
 /* 标签过滤器容器 */
@@ -266,30 +366,31 @@ body {
     justify-content: center;
     margin-bottom: 15px;
     padding: 10px;
-    background-color: #f5f5f5;
+    background-color: #1f1f1f; /* 深色背景 */
     border-radius: 5px;
 }
 
 /* 标签过滤按钮 */
 .tag-filter-button {
     padding: 6px 12px;
-    border: 1px solid #ccc;
+    border: 1px solid #555;
     border-radius: 20px;
-    background-color: #fff;
+    background-color: #333;
+    color: #f0f0f0;
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s ease;
 }
 
 .tag-filter-button:hover {
-    background-color: #f0f0f0;
-    border-color: #999;
+    background-color: #444;
+    border-color: #777;
 }
 
 .tag-filter-button.active {
-    background-color: #4a90e2;
-    color: white;
-    border-color: #4a90e2;
+    background-color: #82b948; /* 草绿色 */
+    color: #111;
+    border-color: #82b948;
 }
 
 /* 小屏幕上标签过滤按钮的样式 */
@@ -316,8 +417,8 @@ body {
     gap: 10px;
     justify-content: center;
     padding: 15px;
-    border: 1px solid #eee;
-    background-color: #fdfdfd;
+    border: 1px solid #333; /* 深色边框 */
+    background-color: #1f1f1f; /* 深色背景 */
     max-width: 700px; /* 限制最大宽度，约为10个英雄的宽度加间距 */
     margin: 0 auto;
 }
@@ -413,15 +514,15 @@ body {
 .system-banned-section {
     width: 100%;
     padding: 15px;
-    background-color: #fff6e9; /* 淡橙色背景 */
-    border-top: 1px solid #ffcc80;
+    background-color: rgba(230, 81, 0, 0.1); /* 深色主题的淡橙色 */
+    border-top: 1px solid rgba(230, 81, 0, 0.3);
     margin-top: 20px;
 }
 
 .system-banned-section h4 {
     text-align: center;
     margin: 0 0 10px 0;
-    color: #e65100;
+    color: #ffcc80; /* 亮橙色文字 */
     font-size: 16px;
 }
 
@@ -475,8 +576,8 @@ body {
 
 /* Share Links Container */
 .share-links-container {
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: #1f1f1f;
+    border: 1px solid #333;
     border-radius: 5px;
     padding: 15px;
     margin-bottom: 20px;
@@ -485,7 +586,7 @@ body {
 .share-links-container h3 {
     margin-top: 0;
     margin-bottom: 15px;
-    color: #333;
+    color: #f0f0f0;
     text-align: center;
 }
 
@@ -504,7 +605,9 @@ body {
 .share-link input {
     flex: 1;
     padding: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #444;
+    background-color: #1a1a1a;
+    color: #f0f0f0;
     border-radius: 3px;
     margin-right: 10px;
     font-size: 0.8em;
@@ -512,15 +615,15 @@ body {
 
 .share-link button {
     padding: 5px 10px;
-    background-color: #4caf50;
-    color: white;
+    background-color: #82b948;
+    color: #111;
     border: none;
     border-radius: 3px;
     cursor: pointer;
 }
 
 .share-link button:hover {
-    background-color: #45a049;
+    background-color: #6f9e3c;
 }
 
 /* States for champions in the pool */
@@ -558,8 +661,8 @@ body {
 }
 
 /* Action Indicator Colors */
-.blue-turn { background-color: #aaccff; color: #003366;}
-.red-turn { background-color: #ffaaaa; color: #660000;}
+.blue-turn { background-color: rgba(30, 136, 229, 0.2); color: #90caf9;}
+.red-turn { background-color: rgba(229, 57, 53, 0.2); color: #ef9a9a;}
 
 /* Game Selection Styles */
 #game-selection {
@@ -567,9 +670,10 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f8f8f8;
+    background-color: #242424; /* 深色背景 */
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    color: #f0f0f0;
 }
 
 .game-buttons {
@@ -583,8 +687,8 @@ body {
 .game-buttons button {
     padding: 15px 30px;
     font-size: 18px;
-    background-color: #4a90e2;
-    color: white;
+    background-color: #82b948; /* 草绿色 */
+    color: #111;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -592,7 +696,7 @@ body {
 }
 
 .game-buttons button:hover {
-    background-color: #3a80d2;
+    background-color: #6f9e3c;
     transform: translateY(-2px);
 }
 
@@ -602,19 +706,20 @@ body {
 
 .back-button button {
     padding: 10px 20px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
+    background-color: #444; /* 深色按钮 */
+    color: #f0f0f0;
+    border: 1px solid #555;
     border-radius: 5px;
     cursor: pointer;
 }
 
 .back-button button:hover {
-    background-color: #e0e0e0;
+    background-color: #555;
 }
 
 /* Game Indicator Styles */
 #game-indicator {
-    background-color: #2c5282;
+    background-color: #3f51b5; /* 深靛蓝色 */
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
@@ -627,14 +732,14 @@ body {
     width: 100%;
     margin-top: 20px;
     padding: 10px;
-    background-color: #f0f8ff;
-    border: 1px solid #d0e4fe;
+    background-color: rgba(44, 82, 130, 0.2); /* 深色主题的淡蓝色 */
+    border: 1px solid rgba(44, 82, 130, 0.4);
     border-radius: 5px;
 }
 
 .previous-games-info h4 {
     margin: 5px 0;
-    color: #2c5282;
+    color: #a6c5f7; /* 亮蓝色文字 */
 }
 
 .previous-games-champions {
@@ -678,28 +783,28 @@ body {
 .global-session-info {
     margin-top: 20px;
     padding: 15px;
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: #1f1f1f;
+    border: 1px solid #333;
     border-radius: 5px;
 }
 
 .global-session-info h4 {
     margin-top: 0;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #333;
     padding-bottom: 8px;
     margin-bottom: 10px;
-    color: #333;
+    color: #f0f0f0;
 }
 
 .global-session-info h5 {
     margin-top: 20px;
     margin-bottom: 10px;
-    color: #555;
+    color: #ccc;
 }
 
 .global-session-info .session-id {
     font-family: monospace;
-    background-color: #eee;
+    background-color: #333;
     padding: 3px 6px;
     border-radius: 3px;
     margin-left: 5px;
@@ -713,8 +818,8 @@ body {
 .game-session-item {
     margin: 10px 0;
     padding: 8px;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
     border-radius: 3px;
     display: flex;
     align-items: center;
@@ -725,8 +830,8 @@ body {
 .copy-button {
     padding: 4px 8px;
     font-size: 0.9em;
-    background-color: #4CAF50;
-    color: white;
+    background-color: #82b948;
+    color: #111;
     border: none;
     border-radius: 3px;
     cursor: pointer;
@@ -734,7 +839,7 @@ body {
 }
 
 .copy-button:hover {
-    background-color: #45a049;
+    background-color: #6f9e3c;
 }
 
 .open-button {
@@ -758,7 +863,8 @@ body {
     max-width: 1000px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #f5f5f5;
+    background-color: #242424; /* 深色背景 */
+    color: #f0f0f0;
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
@@ -767,25 +873,25 @@ body {
     text-align: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #444;
 }
 
 .distribute-header h2 {
-    color: #333;
+    color: #f0f0f0;
     margin-bottom: 10px;
 }
 
 .distribute-header .session-id {
     font-family: monospace;
     font-weight: bold;
-    background-color: #eee;
+    background-color: #333;
     padding: 2px 6px;
     border-radius: 4px;
 }
 
 .distribute-links h3 {
     margin-bottom: 15px;
-    color: #555;
+    color: #ccc;
 }
 
 .role-links {
@@ -797,10 +903,10 @@ body {
 
 .role-link-box {
     width: 45%;
-    border: 2px solid #ddd;
+    border: 2px solid #444;
     border-radius: 8px;
     overflow: hidden;
-    background-color: white;
+    background-color: #1f1f1f;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     margin-bottom: 15px;
 }
@@ -819,16 +925,18 @@ body {
 .role-link {
     display: flex;
     padding: 10px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #333;
 }
 
 .role-link input {
     flex: 1;
     padding: 8px;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
     border-radius: 4px;
     font-family: monospace;
     font-size: 12px;
+    background-color: #1a1a1a;
+    color: #f0f0f0;
 }
 
 .role-actions {
@@ -840,31 +948,30 @@ body {
 .copy-button, .qrcode-button {
     margin-left: 8px;
     padding: 8px 12px;
-    background-color: #f0f0f0;
+    background-color: #444;
+    color: #f0f0f0;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
     transition: background-color 0.2s;
 }
 
 .copy-button:hover, .qrcode-button:hover {
-    background-color: #e0e0e0;
+    background-color: #555;
 }
 
 .open-button {
     text-decoration: none;
     padding: 8px 12px;
-    background-color: #f0f0f0;
-    color: #333;
+    background-color: #444;
+    color: #f0f0f0;
     border-radius: 4px;
     display: inline-block;
-    font-size: 12px;
     transition: background-color 0.2s;
 }
 
 .open-button:hover {
-    background-color: #e0e0e0;
+    background-color: #555;
 }
 
 .distribute-buttons {
@@ -874,8 +981,8 @@ body {
 
 .primary-button {
     padding: 10px 20px;
-    background-color: #1976D2;
-    color: white;
+    background-color: #82b948;
+    color: #111;
     border: none;
     border-radius: 4px;
     font-size: 14px;
@@ -885,8 +992,8 @@ body {
 
 .secondary-button {
     padding: 10px 20px;
-    background-color: #f0f0f0;
-    color: #333;
+    background-color: #444;
+    color: #f0f0f0;
     border: none;
     border-radius: 4px;
     font-size: 14px;
@@ -894,11 +1001,11 @@ body {
 }
 
 .primary-button:hover {
-    background-color: #1565C0;
+    background-color: #6f9e3c;
 }
 
 .secondary-button:hover {
-    background-color: #e0e0e0;
+    background-color: #555;
 }
 
 .error-message {
@@ -907,7 +1014,7 @@ body {
 }
 
 .error-message h3 {
-    color: #D32F2F;
+    color: #ef9a9a; /* 深色主题下的红色 */
     margin-bottom: 10px;
 }
 
