@@ -284,7 +284,8 @@ async function loadSessionData() {
     
     try {
         // Fetch session data from API
-        const response = await fetch(`${API_BASE_URL}?action=getSession&session_id=${sessionId}`);
+        // 添加时间戳参数防止浏览器缓存
+        const response = await fetch(`${API_BASE_URL}?action=getSession&session_id=${sessionId}&_t=${Date.now()}`);
         const responseData = await response.json();
         
         if (responseData.status === 'error') {
@@ -704,10 +705,12 @@ function getChampionName(championId) {
 // --- Polling for Updates ---
 function startSessionPolling() {
     if (userRole !== 'host') {
-        // Poll every 2 seconds for changes
-        setInterval(async () => {
+        // 使用递归setTimeout代替setInterval，防止请求堆积
+        const poll = async () => {
             await loadSessionData();
-        }, 2000);
+            setTimeout(poll, 500); // 1秒轮询一次，提高响应速度
+        };
+        poll();
     }
 }
 
@@ -752,10 +755,7 @@ async function saveSessionData() {
         if (responseData.status === 'error') {
             throw new Error(responseData.message);
         }
-        
-        // 更新最后轮询时间
-        lastPollTime = Date.now();
-        
+
         // 保存成功后再次更新UI，确保本地显示状态是最新的
         updateAllUI();
         
