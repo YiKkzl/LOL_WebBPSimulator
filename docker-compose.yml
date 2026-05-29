@@ -1,0 +1,33 @@
+services:
+  lolbp-mysql:
+    image: mysql:8.4
+    container_name: lolbp-mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: lolbp_root_password
+      MYSQL_DATABASE: lolbp_test
+      MYSQL_USER: lolbp
+      MYSQL_PASSWORD: lolbp_dev_password
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --performance-schema=OFF
+      - --innodb-buffer-pool-size=128M
+      - --max-connections=50
+      - --skip-log-bin
+    volumes:
+      - lolbp_mysql_data:/var/lib/mysql
+      - ./db_setup.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      - ./docker/mysql/init/002-readonly-user.sql:/docker-entrypoint-initdb.d/002-readonly-user.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -ulolbp -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+
+volumes:
+  lolbp_mysql_data:

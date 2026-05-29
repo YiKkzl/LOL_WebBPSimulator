@@ -1,0 +1,31 @@
+{
+  "name": "lol-web-bp-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "e2e": "docker compose up -d --wait lolbp-mysql && playwright test",
+    "lint": "eslint .",
+    "start": "next start",
+    "test": "vitest run",
+    "typecheck": "next typegen && tsc --noEmit --incremental false"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.2.6",
+    "prisma": "^6.19.0",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
+  }
+}

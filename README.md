@@ -1,43 +1,64 @@
-# YiKk_LOLBP - 英雄联盟BP模拟器
+# YiKk_LOLBP - 英雄联盟 BP 模拟器
 
-这是一个功能丰富的英雄联盟BP（禁用/选择）模拟器，支持多种模式和角色协作，旨在提供流畅（？）的BP体验。
+YiKk_LOLBP 是一个基于 Next.js 的英雄联盟 BP（禁用/选择）模拟器，支持竞技征召、全局 BP、多角色协作和会话持久化。
 
-## 主要功能
+## 功能
 
-### 1. 多种BP模式
--   **竞技征召BP模式**：标准的竞技征召BP流程。
--   **全局BP模式**：
-    -   支持进行多场游戏（最多5场）。
-    -   前面对局中被选择的英雄将在后续对局中自动成为**系统禁用英雄**，无法再次被选择。
+- 竞技征召 BP：按标准 Ban/Pick 顺序推进，支持空 Ban。
+- 全局 BP：最多 5 场对局，后续对局会自动系统禁用前面对局已选英雄。
+- 多角色链接：主机、蓝方、红方、裁判、观战者使用同一会话的不同权限入口。
+- 裁判控制：裁判可系统禁用或解禁英雄，并同步给所有参与者。
+- 兼容入口：旧分享链接 `/?session=...&role=...`、全局 BP 链接 `/?mode=distribute&game=...&global_session=...` 继续可用。
+- 兼容 API：对外仍保留 `/api.php?action=...` 路径，由 Next.js API route 处理。
 
-### 2. 角色权限管理
--   **主机 (Host)**：拥有所有操作权限，可以启动不同模式、创建会话、分发链接。
--   **蓝方队长 (Blue Team)**：只能操作蓝方的禁用和选择。
--   **红方队长 (Red Team)**：只能操作红方的禁用和选择。
--   **裁判 (Referee)**：
-    -   可以实时对英雄进行**系统禁用**或**解禁**，这些操作会立即同步给所有参与者。
-    -   拥有与主机类似的操作权限。
--   **观战者 (Observer)**：只能观看BP流程，没有任何操作权限。
+## 技术栈
 
-### 3. 会话管理与同步
--   **实时同步**：所有参与者（主机、蓝红队长、裁判、观战者）的界面都会实时同步BP进度和英雄选择状态。
--   **分享链接**：主机可以生成特定会话的分享链接，包含不同角色的权限，方便团队成员或观众加入。
--   **会话数据持久化**：BP数据会保存到后端，确保会话状态的稳定性。
+- Next.js App Router
+- React
+- TypeScript
+- Prisma
+- MySQL
+- Vitest
+- Playwright
 
-### 4. 英雄选择与禁用功能
--   **直观的UI**：清晰的界面显示当前禁用/选择的英雄、轮到哪一方以及当前动作。
--   **英雄池**：显示所有可用的英雄，支持按名称搜索和按英雄定位（标签）过滤。
--   **计时器**：每一步BP都有倒计时，模拟真实比赛的紧张感。
--   **空Ban选项**：在禁用阶段，如果不想禁用英雄，可以选择"空Ban"。
--   **待选区**：在确认选择前，可以在待选区预览即将选择的英雄。
+根目录旧版 `index.html`、`script.js`、`style.css`、`api.php`、`db_config.php` 已在最终清理阶段移除。旧静态前端副本保留在 `public/legacy/`，用于必要时的静态页面参考；数据读写仍通过兼容的 `/api.php` 路径进入 Next.js API。
 
-### 5. 详细的BP流程显示
--   界面会清晰显示BP的当前阶段（例如：Ban1, Pick1, Ban2, Pick2）和当前步数（例如：B1, P2）。
--   前面对局已选英雄（自动禁用）区域会显示在当前对局中被系统禁用的英雄。
+## 本地开发
 
-## 技术说明
+启动本地测试数据库：
 
-- 前端: HTML, CSS, JavaScript (纯原生, 无框架)
-- 后端: PHP
-- 数据库: MySQL
-- 英雄数据: Riot Games Data Dragon API
+```powershell
+docker compose up -d lolbp-mysql
+```
+
+设置数据库连接：
+
+```powershell
+$env:DATABASE_URL="mysql://lolbp:lolbp_dev_password@127.0.0.1:3307/lolbp_test"
+```
+
+安装依赖并启动开发服务：
+
+```powershell
+npm install
+npm run dev
+```
+
+常用验证命令：
+
+```powershell
+npm run lint
+npm run typecheck
+npm run test
+npm run e2e
+npm run build
+```
+
+## 路由
+
+- `/`：Next.js 主入口。
+- `/?session={session_id}&role={role}`：会话角色入口。
+- `/?mode=distribute&game={1..5}&global_session={global_session_id}`：全局 BP 对局链接分发入口。
+- `/legacy`：旧静态前端说明页。
+- `/legacy/index.html`：归档的旧静态前端副本。
+- `/api.php?action=...`：兼容旧 API 路径。

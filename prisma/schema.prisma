@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model BpSession {
+  sessionId             String            @id @map("session_id") @db.VarChar(20)
+  currentMode           String?           @map("current_mode") @db.VarChar(20)
+  currentPhase          String?           @map("current_phase") @db.VarChar(20)
+  currentStep           Int?              @map("current_step")
+  whosTurn              String?           @map("whos_turn") @db.VarChar(10)
+  actionType            String?           @map("action_type") @db.VarChar(10)
+  blueBans              String?           @map("blue_bans") @db.Text
+  redBans               String?           @map("red_bans") @db.Text
+  bluePicks             String?           @map("blue_picks") @db.Text
+  redPicks              String?           @map("red_picks") @db.Text
+  systemBannedChampions String?           @map("system_banned_champions") @db.Text
+  lastUpdated           DateTime          @default(now()) @updatedAt @map("last_updated") @db.Timestamp(0)
+  activity              SessionActivity[]
+
+  @@map("bp_sessions")
+}
+
+model SessionActivity {
+  id         Int        @id @default(autoincrement())
+  sessionId  String?    @map("session_id") @db.VarChar(20)
+  action     String?    @db.VarChar(50)
+  actionBy   String?    @map("action_by") @db.VarChar(20)
+  actionData String?    @map("action_data") @db.Text
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamp(0)
+  bpSession  BpSession? @relation(fields: [sessionId], references: [sessionId], onUpdate: Restrict, onDelete: Restrict)
+
+  @@index([sessionId], map: "session_activity_session_id_fkey")
+  @@map("session_activity")
+}
+
+model GlobalGame {
+  id              Int       @id @default(autoincrement()) @db.UnsignedInt
+  globalSessionId String    @unique @map("global_session_id") @db.VarChar(50)
+  sessionId1      String?   @map("session_id1") @db.VarChar(50)
+  sessionId2      String?   @map("session_id2") @db.VarChar(50)
+  sessionId3      String?   @map("session_id3") @db.VarChar(50)
+  sessionId4      String?   @map("session_id4") @db.VarChar(50)
+  sessionId5      String?   @map("session_id5") @db.VarChar(50)
+  createdAt       DateTime? @map("created_at") @db.DateTime(0)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  @@map("global_games")
+}
