@@ -56,7 +56,7 @@ export function SessionView() {
     return (
       <main className="legacy-page">
         <div id="initial-screen-container">
-          <h1 id="main-title">YiKkBP模拟器</h1>
+          <h1 id="main-title">LOL BP模拟器</h1>
           <p>加载中...</p>
         </div>
       </main>
@@ -91,7 +91,7 @@ function InitialLoading() {
   return (
     <main className="legacy-page">
       <div id="initial-screen-container">
-        <h1 id="main-title">YiKkBP模拟器</h1>
+        <h1 id="main-title">LOL BP模拟器</h1>
         <p>加载中...</p>
       </div>
     </main>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { ChampionPool } from "@/src/components/ChampionPool";
 import { RefereePanel } from "@/src/components/RefereePanel";
 import { ShareLinks } from "@/src/components/ShareLinks";
@@ -18,6 +20,7 @@ interface BpBoardProps {
 
 export function BpBoard({ session, champions, tags, version, onBack }: BpBoardProps) {
   const pendingChampion = champions.find((champion) => champion.id === session.pendingChampionId);
+  const elapsedSeconds = useStepTimer(session.state.currentStep, session.state.currentPhase);
   const modeTitle =
     session.state.mode === "global"
       ? `全局BP模式 - Game ${session.gameNumber || 1}`
@@ -84,7 +87,7 @@ export function BpBoard({ session, champions, tags, version, onBack }: BpBoardPr
           </button>
         ) : null}
         <div id="timer">
-          计时: <span id="timer-value">30</span>s
+          计时: <span id="timer-value">{elapsedSeconds}</span>s
         </div>
         <button id="reset-button" onClick={resetButtonAction} type="button">
           {getResetButtonText(session.role)}
@@ -147,6 +150,34 @@ export function BpBoard({ session, champions, tags, version, onBack }: BpBoardPr
       />
     </div>
   );
+}
+
+function useStepTimer(currentStep: number, currentPhase: string) {
+  const [timerState, setTimerState] = useState({
+    currentPhase,
+    currentStep,
+    elapsedSeconds: 0,
+  });
+
+  useEffect(() => {
+    const startedAt = Date.now();
+
+    const interval = window.setInterval(() => {
+      setTimerState({
+        currentPhase,
+        currentStep,
+        elapsedSeconds: Math.floor((Date.now() - startedAt) / 1000),
+      });
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [currentPhase, currentStep]);
+
+  if (timerState.currentPhase !== currentPhase || timerState.currentStep !== currentStep) {
+    return 0;
+  }
+
+  return timerState.elapsedSeconds;
 }
 
 function PreviousGamesInfo({

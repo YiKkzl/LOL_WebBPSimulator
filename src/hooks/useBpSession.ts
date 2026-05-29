@@ -71,6 +71,7 @@ interface LegacySessionRecord {
 interface SaveOptions {
   action?: string;
   userRole?: UserRole;
+  expectedStep?: number;
 }
 
 const emptySessionState = createInitialSessionState("competitive");
@@ -102,6 +103,7 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
         ...toLegacySessionPayload(nextState, sessionId),
         global_session_id: globalSessionId,
         game_number: gameNumber || null,
+        expected_current_step: saveOptions.expectedStep,
         user_role: saveOptions.userRole ?? role,
         action: saveOptions.action ?? nextState.actionType,
       });
@@ -267,7 +269,7 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
   }, [loadSession, options.gameNumber, options.globalSessionId, options.role, options.sessionId]);
 
   useEffect(() => {
-    if (!isSessionActive || !sessionId || role === "host") {
+    if (!isSessionActive || !sessionId) {
       return;
     }
 
@@ -364,9 +366,16 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
       const nextState = { ...state, systemBannedChampions: nextSystemBans };
 
       setState(nextState);
-      await saveSessionData(nextState, { action: `system_ban_${championId}`, userRole: "referee" });
+      const saved = await saveSessionData(nextState, {
+        action: `system_ban_${championId}`,
+        expectedStep: state.currentStep,
+        userRole: "referee",
+      });
+      if (!saved) {
+        await loadSession();
+      }
     },
-    [role, saveSessionData, state],
+    [loadSession, role, saveSessionData, state],
   );
 
   const selectChampion = useCallback(
@@ -401,8 +410,14 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
 
     setState(result.state);
     setPendingChampionId(null);
-    await saveSessionData(result.state, { action: `${state.actionType}_${pendingChampionId}` });
-  }, [canAct, pendingChampionId, saveSessionData, state]);
+    const saved = await saveSessionData(result.state, {
+      action: `${state.actionType}_${pendingChampionId}`,
+      expectedStep: state.currentStep,
+    });
+    if (!saved) {
+      await loadSession();
+    }
+  }, [canAct, loadSession, pendingChampionId, saveSessionData, state]);
 
   const emptyBan = useCallback(async () => {
     if (!canAct || state.actionType !== "ban") {
@@ -416,8 +431,14 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
 
     setState(result.state);
     setPendingChampionId(null);
-    await saveSessionData(result.state, { action: "empty_ban" });
-  }, [canAct, saveSessionData, state]);
+    const saved = await saveSessionData(result.state, {
+      action: "empty_ban",
+      expectedStep: state.currentStep,
+    });
+    if (!saved) {
+      await loadSession();
+    }
+  }, [canAct, loadSession, saveSessionData, state]);
 
   const reset = useCallback(() => {
     setSessionId(null);

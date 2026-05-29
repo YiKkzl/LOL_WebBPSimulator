@@ -19,7 +19,7 @@ export function ModeSelection({
 
   return (
     <div id="initial-screen-container">
-      <h1 id="main-title">YiKkBP模拟器</h1>
+      <h1 id="main-title">LOL BP模拟器</h1>
       <div id="mode-selection">
         <h2>选择模式</h2>
         <button disabled={isBusy} onClick={onStartGlobal} type="button">

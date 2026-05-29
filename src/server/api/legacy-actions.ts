@@ -171,6 +171,13 @@ async function updateSession(
     return legacyError("会话不存在");
   }
 
+  if (hasExpectedCurrentStep(body.expected_current_step)) {
+    const expectedCurrentStep = legacyInt(body.expected_current_step);
+    if ((existing.current_step ?? 0) !== expectedCurrentStep) {
+      return legacyError("会话已更新，请刷新后重试");
+    }
+  }
+
   try {
     await dependencies.updateBpSession(toSessionInput(body));
 
@@ -349,6 +356,10 @@ function decodeLegacyJsonArray(value: string | null): string[] | null {
   } catch {
     return null;
   }
+}
+
+function hasExpectedCurrentStep(value: unknown): boolean {
+  return value !== undefined && value !== null && value !== "";
 }
 
 async function globalGamesTableExists(client: PrismaClient): Promise<boolean> {

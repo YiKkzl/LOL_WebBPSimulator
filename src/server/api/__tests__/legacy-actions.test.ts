@@ -220,6 +220,60 @@ describe("legacy API actions", () => {
     });
   });
 
+  it("rejects stale BP session updates before overwriting state", async () => {
+    const dependencies = createDependencies();
+
+    await handleLegacyAction(
+      "POST",
+      "createSession",
+      new URLSearchParams(),
+      {
+        session_id: "test",
+        current_mode: "competitive",
+        current_step: 1,
+        red_bans: ["Ahri"],
+      },
+      dependencies,
+    );
+
+    await expect(
+      handleLegacyAction(
+        "POST",
+        "updateSession",
+        new URLSearchParams(),
+        {
+          session_id: "test",
+          current_mode: "competitive",
+          current_step: 1,
+          expected_current_step: 0,
+          blue_bans: ["Akali"],
+          red_bans: [],
+        },
+        dependencies,
+      ),
+    ).resolves.toEqual({
+      status: "error",
+      message: "会话已更新，请刷新后重试",
+    });
+
+    await expect(
+      handleLegacyAction(
+        "GET",
+        "getSession",
+        new URLSearchParams("session_id=test"),
+        null,
+        dependencies,
+      ),
+    ).resolves.toMatchObject({
+      status: "success",
+      data: {
+        current_step: 1,
+        blue_bans: [],
+        red_bans: ["Ahri"],
+      },
+    });
+  });
+
   it("returns the legacy missing-session error before update", async () => {
     await expect(
       handleLegacyAction(
