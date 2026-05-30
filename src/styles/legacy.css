@@ -463,13 +463,8 @@ body {
     gap: 7px;
 }
 
-.observer-banner-group.bans .observer-banner-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-}
-
 .observer-banner-empty {
-    min-height: 42px;
+    min-height: 86px;
     display: grid;
     place-items: center;
     border: 1px dashed #444;
@@ -479,7 +474,7 @@ body {
 
 .observer-draft-banner {
     position: relative;
-    min-height: 52px;
+    min-height: 86px;
     overflow: hidden;
     border: 1px solid #555;
     background: #252525;
@@ -493,10 +488,6 @@ body {
 
 .observer-team-column.red .observer-draft-banner {
     border-color: rgba(229, 57, 53, 0.55);
-}
-
-.observer-banner-group.bans .observer-draft-banner {
-    min-height: 40px;
 }
 
 .observer-draft-banner img {
@@ -516,10 +507,6 @@ body {
 
 .observer-banner-art {
     z-index: 2;
-}
-
-.observer-draft-banner.ban-banner img {
-    filter: grayscale(100%);
 }
 
 .observer-banner-fallback {
@@ -544,20 +531,6 @@ body {
     text-shadow: 0 1px 2px #000;
 }
 
-.observer-ban-symbol {
-    position: absolute;
-    inset: 0;
-    z-index: 4;
-    display: grid;
-    place-items: center;
-    color: #ff3535;
-    font-size: 2.4em;
-    font-weight: bold;
-    line-height: 1;
-    text-shadow: 0 0 7px rgba(255, 0, 0, 0.8);
-    animation: observer-ban-symbol-fade 650ms ease-out both;
-}
-
 @keyframes observer-banner-reveal {
     from {
         opacity: 0;
@@ -570,27 +543,9 @@ body {
     }
 }
 
-@keyframes observer-ban-symbol-fade {
-    0%,
-    45% {
-        opacity: 1;
-        transform: scale(0.7);
-    }
-
-    100% {
-        opacity: 0;
-        transform: scale(1.2);
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .observer-draft-banner,
-    .observer-ban-symbol {
+    .observer-draft-banner {
         animation: none;
-    }
-
-    .observer-ban-symbol {
-        opacity: 0;
     }
 }
 
@@ -680,10 +635,6 @@ body {
         width: 58%;
         gap: 7px;
         padding: 4px 7px;
-    }
-
-    .observer-banner-group.bans .observer-banner-list {
-        grid-template-columns: 1fr;
     }
 
     #champion-pool {

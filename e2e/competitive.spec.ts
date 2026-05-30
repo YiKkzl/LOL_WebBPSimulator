@@ -53,7 +53,7 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
 
   await bluePage.locator("#empty-ban-button").click();
   await waitAction(redPage, "红方 禁用 B1");
-  await expect(observerPage.locator('[data-empty-ban="true"]')).toBeVisible();
+  await expect(observerPage.locator('[data-empty-ban="true"]')).toHaveCount(0);
 
   await redPage.locator('#champion-pool [data-id="Aatrox"]').click();
   await expect(redPage.locator("#confirm-button")).toBeEnabled();
@@ -61,21 +61,8 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(bluePage.locator("#pending-champion")).toContainText("暗裔剑魔");
   await redPage.locator("#confirm-button").click();
   await expect(observerPage.locator("#pending-champion")).toHaveText("无");
-  await expect(observerPage.locator('[data-action-type="ban"][data-champion-id="Aatrox"]')).toBeVisible();
-  await expect(
-    observerPage.locator('[data-action-type="ban"][data-champion-id="Aatrox"] .observer-banner-art'),
-  ).toHaveCSS("filter", "grayscale(1)");
-  await expect(
-    observerPage.locator('[data-action-type="ban"][data-champion-id="Aatrox"] .observer-ban-symbol'),
-  ).toHaveCount(1);
-  const lateObserverPage = await browser.newPage();
-  await mockDataDragon(lateObserverPage.context());
-  await lateObserverPage.goto(observerUrl);
-  await expect(lateObserverPage.locator('[data-action-type="ban"][data-champion-id="Aatrox"]')).toBeVisible();
-  await expect(
-    lateObserverPage.locator('[data-action-type="ban"][data-champion-id="Aatrox"]'),
-  ).toHaveCSS("animation-name", "observer-banner-reveal");
-  await lateObserverPage.close();
+  await expect(observerPage.locator('[data-action-type="ban"]')).toHaveCount(0);
+  await expect(observerPage.locator('[data-champion-id="Aatrox"]')).toHaveCount(0);
   await waitAction(bluePage, "蓝方 禁用 B2");
 
   await selectAndConfirm(bluePage, "Ahri");
@@ -96,6 +83,18 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(
     observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"] .observer-banner-art'),
   ).toHaveAttribute("src", /\/cdn\/img\/champion\/loading\/Garen_0\.jpg$/);
+  await expect
+    .poll(async () => (await observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]').boundingBox())?.height)
+    .toBeGreaterThanOrEqual(86);
+  const lateObserverPage = await browser.newPage();
+  await mockDataDragon(lateObserverPage.context());
+  await lateObserverPage.goto(observerUrl);
+  await expect(lateObserverPage.locator('[data-action-type="pick"][data-champion-id="Garen"]')).toBeVisible();
+  await expect(
+    lateObserverPage.locator('[data-action-type="pick"][data-champion-id="Garen"]'),
+  ).toHaveCSS("animation-name", "observer-banner-reveal");
+  await expect(lateObserverPage.locator('[data-action-type="ban"]')).toHaveCount(0);
+  await lateObserverPage.close();
 
   await selectAndConfirm(redPage, "Darius");
   await waitAction(bluePage, "红方 选用 P2");
