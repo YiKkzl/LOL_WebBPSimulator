@@ -41,6 +41,7 @@ Success data:
 - Returns the matching `bp_sessions` row.
 - `blue_bans`, `red_bans`, `blue_picks`, and `red_picks` are decoded from JSON strings to arrays.
 - `system_banned_champions` is returned as stored by MySQL. Existing browser code accepts either an array or a JSON string.
+- `pending_champion_id` returns the current unconfirmed champion id or `null`.
 
 Errors:
 
@@ -67,6 +68,7 @@ Optional JSON fields:
 - `current_step`
 - `whos_turn`
 - `action_type`
+- `pending_champion_id`
 - `blue_bans`
 - `red_bans`
 - `blue_picks`
@@ -115,6 +117,7 @@ Optional JSON fields:
 - `current_step`
 - `whos_turn`
 - `action_type`
+- `pending_champion_id`
 - `blue_bans`
 - `red_bans`
 - `blue_picks`
@@ -152,6 +155,38 @@ Errors:
 - `会话ID不能为空`
 - `会话不存在`
 - `更新会话失败: {mysqli error}`
+
+## POST updatePendingChampion
+
+Request:
+
+```text
+POST /api.php?action=updatePendingChampion
+Content-Type: application/json
+```
+
+Required JSON fields:
+
+- `session_id`
+- `expected_current_step`
+
+Optional JSON fields:
+
+- `pending_champion_id`: champion id, or `null` to clear the current pending selection.
+
+Persistence:
+
+- Updates only `bp_sessions.pending_champion_id`.
+- Rejects stale step values and champions already present in picks, bans, or system bans.
+- Does not insert a `session_activity` row.
+
+Errors:
+
+- `参数错误：会话ID和当前步骤不能为空`
+- `会话不存在`
+- `会话已更新，请刷新后重试`
+- `英雄不可用，请重新选择`
+- `更新待选英雄失败: {database error}`
 
 ## POST createGlobalSession
 

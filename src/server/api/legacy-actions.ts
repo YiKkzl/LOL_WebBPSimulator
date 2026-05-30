@@ -7,6 +7,7 @@ import {
   type CreateBpSessionInput,
   type LegacyBpSessionRecord,
   updateBpSession,
+  updatePendingChampion,
 } from "@/src/server/repositories/bp-session-repository";
 import {
   createGlobalGame,
@@ -35,6 +36,10 @@ export interface LegacyActionDependencies {
   findBpSessionById: (sessionId: string) => Promise<LegacyBpSessionRecord | null>;
   createBpSession: (input: CreateBpSessionInput) => Promise<LegacyBpSessionRecord>;
   updateBpSession: (input: CreateBpSessionInput) => Promise<LegacyBpSessionRecord>;
+  updatePendingChampion: (input: {
+    session_id: string;
+    pending_champion_id: string | null;
+  }) => Promise<LegacyBpSessionRecord>;
   createSessionActivity: (input: CreateSessionActivityInput) => Promise<unknown>;
   globalGamesTableExists: () => Promise<boolean>;
   ensureGlobalGamesTable: () => Promise<void>;
@@ -56,6 +61,7 @@ const defaultDependencies: LegacyActionDependencies = {
   findBpSessionById,
   createBpSession,
   updateBpSession,
+  updatePendingChampion,
   createSessionActivity,
   globalGamesTableExists: () => globalGamesTableExists(db),
   ensureGlobalGamesTable: () => ensureGlobalGamesTable(db),
@@ -99,6 +105,10 @@ export async function handleLegacyAction(
 
     if (action === "updateSession") {
       return updateSession(body, dependencies);
+    }
+
+    if (action === "updatePendingChampion") {
+      return updatePendingChampionAction(body, dependencies);
     }
 
     if (action === "createGlobalSession") {
@@ -198,6 +208,48 @@ async function updateSession(
     });
   } catch (error) {
     return legacyError(`更新会话失败: ${getErrorMessage(error)}`);
+  }
+}
+
+async function updatePendingChampionAction(
+  body: LegacyPostBody,
+  dependencies: LegacyActionDependencies,
+): Promise<LegacyApiResponse> {
+  const sessionId = body.session_id;
+
+  if (isLegacyEmpty(sessionId) || !hasExpectedCurrentStep(body.expected_current_step)) {
+    return legacyError("参数错误：会话ID和当前步骤不能为空");
+  }
+
+  const sessionIdString = legacyString(sessionId);
+  const existing = await dependencies.findBpSessionById(sessionIdString);
+  if (!existing) {
+    return legacyError("会话不存在");
+  }
+
+  const expectedCurrentStep = legacyInt(body.expected_current_step);
+  if ((existing.current_step ?? 0) !== expectedCurrentStep) {
+    return legacyError("会话已更新，请刷新后重试");
+  }
+
+  const pendingChampionId = nullableLegacyString(body.pending_champion_id);
+  if (pendingChampionId && isPendingChampionUnavailable(existing, pendingChampionId)) {
+    return legacyError("英雄不可用，请重新选择");
+  }
+
+  try {
+    await dependencies.updatePendingChampion({
+      session_id: sessionIdString,
+      pending_champion_id: pendingChampionId,
+    });
+
+    return legacySuccess({
+      session_id: sessionIdString,
+      pending_champion_id: pendingChampionId,
+      message: "待选英雄更新成功",
+    });
+  } catch (error) {
+    return legacyError(`更新待选英雄失败: ${getErrorMessage(error)}`);
   }
 }
 
@@ -327,6 +379,7 @@ function toSessionInput(body: LegacyPostBody): CreateBpSessionInput {
     current_step: legacyInt(body.current_step),
     whos_turn: legacyString(body.whos_turn),
     action_type: legacyString(body.action_type),
+    pending_champion_id: nullableLegacyString(body.pending_champion_id),
     blue_bans: legacyArrayField(body.blue_bans),
     red_bans: legacyArrayField(body.red_bans),
     blue_picks: legacyArrayField(body.blue_picks),
@@ -343,6 +396,27 @@ function decodeSessionForRead(session: LegacyBpSessionRecord): Record<string, un
     blue_picks: decodeLegacyJsonArray(session.blue_picks),
     red_picks: decodeLegacyJsonArray(session.red_picks),
   };
+}
+
+function nullableLegacyString(value: unknown): string | null {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  return String(value);
+}
+
+function isPendingChampionUnavailable(
+  session: LegacyBpSessionRecord,
+  championId: string,
+): boolean {
+  return [
+    session.blue_bans,
+    session.red_bans,
+    session.blue_picks,
+    session.red_picks,
+    session.system_banned_champions,
+  ].some((value) => decodeLegacyJsonArray(value)?.includes(championId));
 }
 
 function decodeLegacyJsonArray(value: string | null): string[] | null {

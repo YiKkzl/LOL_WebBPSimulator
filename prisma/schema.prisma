@@ -14,6 +14,7 @@ model BpSession {
   currentStep           Int?              @map("current_step")
   whosTurn              String?           @map("whos_turn") @db.VarChar(10)
   actionType            String?           @map("action_type") @db.VarChar(10)
+  pendingChampionId     String?           @map("pending_champion_id") @db.VarChar(64)
   blueBans              String?           @map("blue_bans") @db.Text
   redBans               String?           @map("red_bans") @db.Text
   bluePicks             String?           @map("blue_picks") @db.Text

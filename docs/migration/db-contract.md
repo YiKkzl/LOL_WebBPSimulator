@@ -28,6 +28,7 @@ Created by `db_setup.sql`.
 | `current_step` | `INT` | nullable | Zero-based BP step. Competitive/global finishes after step 19. |
 | `whos_turn` | `VARCHAR(10)` | nullable | `blue`, `red`, or empty when finished. |
 | `action_type` | `VARCHAR(10)` | nullable | `ban`, `pick`, or empty when finished. |
+| `pending_champion_id` | `VARCHAR(64)` | nullable | Current unconfirmed champion selection. Cleared when the turn advances. |
 | `blue_bans` | `TEXT` | nullable | JSON string array. Empty ban markers use `EmptyBan_{timestamp}`. |
 | `red_bans` | `TEXT` | nullable | JSON string array. Empty ban markers use `EmptyBan_{timestamp}`. |
 | `blue_picks` | `TEXT` | nullable | JSON string array of champion ids. |
@@ -41,6 +42,7 @@ Compatibility requirements:
 - Do not rename columns.
 - Do not widen or normalize `session_id` semantics without a compatibility layer.
 - Preserve `last_updated` behavior or provide an equivalent value in API responses.
+- Apply the Prisma schema with `npx prisma db push` when upgrading an existing database so `pending_champion_id` is added without removing historical rows.
 
 ## Table: session_activity
 

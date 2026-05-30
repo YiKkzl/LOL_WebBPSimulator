@@ -11,6 +11,7 @@ export function createInitialSessionState(
     currentPhase: "",
     whosTurn: "",
     actionType: "",
+    pendingChampionId: null,
     blueBans: [],
     redBans: [],
     bluePicks: [],

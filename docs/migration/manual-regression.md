@@ -51,6 +51,9 @@ Open generated role links in separate browser tabs:
 - Blue role can act only on blue turns.
 - Red role can act only on red turns.
 - Observer role cannot select champions or use empty ban.
+- Observer role replaces the champion pool with blue/red splash banners grouped into Picks and Bans.
+- Selecting a champion updates the pending champion label in every open role tab before confirmation.
+- Confirmed bans briefly show a red prohibition symbol and remain grayscale; empty bans render a placeholder banner.
 - Referee role can open referee controls.
 - Referee can system-ban and unban a champion.
 - System-banned champions appear unavailable to other roles after sync.
@@ -60,6 +63,7 @@ Open generated role links in separate browser tabs:
 
 - Starting a competitive BP creates a row in `bp_sessions`.
 - Confirming a pick or ban updates `current_phase`, `current_step`, `whos_turn`, `action_type`, and the relevant JSON-string array.
+- Selecting an unconfirmed champion updates `pending_champion_id`; confirming or empty banning clears it.
 - `updateSession` inserts a row in `session_activity`.
 - `GET getSession` returns decoded arrays for `blue_bans`, `red_bans`, `blue_picks`, and `red_picks`.
 - Missing or unknown `session_id` returns an error response, not HTML.

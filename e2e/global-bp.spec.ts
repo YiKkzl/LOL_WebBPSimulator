@@ -104,6 +104,7 @@ async function createSession(
       current_step: 0,
       whos_turn: "blue",
       action_type: "ban",
+      pending_champion_id: null,
       blue_bans: [],
       red_bans: [],
       blue_picks: [],

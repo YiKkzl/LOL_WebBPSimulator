@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS bp_sessions (
     current_step INT,
     whos_turn VARCHAR(10),
     action_type VARCHAR(10),
+    pending_champion_id VARCHAR(64),
     blue_bans TEXT,
     red_bans TEXT, 
     blue_picks TEXT,
@@ -23,4 +24,4 @@ CREATE TABLE IF NOT EXISTS session_activity (
     action_data TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES bp_sessions(session_id)
-); 
+);

@@ -20,8 +20,31 @@ test("legacy api supports session and global session contracts", async ({ reques
       current_mode: "competitive",
       whos_turn: "blue",
       action_type: "ban",
+      pending_champion_id: null,
       blue_bans: [],
       red_bans: [],
+    },
+  });
+
+  await expectLegacySuccess(
+    request.post("/api.php?action=updatePendingChampion", {
+      data: {
+        session_id: sessionId,
+        pending_champion_id: "Ahri",
+        expected_current_step: 0,
+      },
+    }),
+  );
+
+  const pendingSession = await legacyJson(
+    request.get(`/api.php?action=getSession&session_id=${sessionId}`),
+  );
+  expect(pendingSession).toMatchObject({
+    status: "success",
+    data: {
+      session_id: sessionId,
+      current_step: 0,
+      pending_champion_id: "Ahri",
     },
   });
 
@@ -106,6 +129,7 @@ function sessionPayload(sessionId: string, overrides: Record<string, unknown> = 
     current_step: 0,
     whos_turn: "blue",
     action_type: "ban",
+    pending_champion_id: null,
     blue_bans: [],
     red_bans: [],
     blue_picks: [],

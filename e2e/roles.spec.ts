@@ -21,9 +21,11 @@ test("observer is read-only and referee can system ban or unban champions", asyn
   await page.goto(`/?session=${sessionId}&role=observer`);
   await expect(page.locator("#observer-notice")).toContainText("观战模式");
   await expect(page.locator("#share-links")).toHaveCount(0);
-  await page.locator('#champion-pool [data-id="Aatrox"]').click();
+  await expect(page.locator("#observer-draft-display")).toBeVisible();
+  await expect(page.locator("#champion-pool")).toHaveCount(0);
   await expect(page.locator("#pending-champion")).toHaveText("无");
-  await expect(page.locator("#confirm-button")).toBeDisabled();
+  await expect(page.locator("#confirm-button")).toHaveCount(0);
+  await expect(page.locator("#empty-ban-button")).toHaveCount(0);
   await page.locator("#reset-button").click();
   await expect(page.locator("#mode-selection")).toBeVisible();
 
@@ -59,6 +61,7 @@ async function createSession(request: APIRequestContext, sessionId: string) {
       current_step: 0,
       whos_turn: "blue",
       action_type: "ban",
+      pending_champion_id: null,
       blue_bans: [],
       red_bans: [],
       blue_picks: [],

@@ -409,6 +409,180 @@ body {
     padding: 0 10px;
 }
 
+/* Observer draft presentation */
+.observer-draft-display {
+    width: 55%;
+    min-height: 400px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+    gap: 14px;
+    padding: 4px 14px;
+    background:
+        radial-gradient(circle at center, rgba(209, 169, 84, 0.08), transparent 55%),
+        #1f1f1f;
+    border: 1px solid #333;
+    overflow: hidden;
+}
+
+.observer-draft-divider {
+    background: linear-gradient(transparent, rgba(209, 169, 84, 0.65), transparent);
+}
+
+.observer-team-column {
+    min-width: 0;
+}
+
+.observer-team-column h3,
+.observer-banner-group h4 {
+    margin: 0;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.observer-team-column.blue h3 {
+    color: #90caf9;
+}
+
+.observer-team-column.red h3 {
+    color: #ef9a9a;
+}
+
+.observer-banner-group {
+    margin-top: 12px;
+}
+
+.observer-banner-group h4 {
+    margin-bottom: 7px;
+    color: #b7b7b7;
+    font-size: 0.72em;
+    text-transform: uppercase;
+}
+
+.observer-banner-list {
+    display: grid;
+    gap: 7px;
+}
+
+.observer-banner-group.bans .observer-banner-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.observer-banner-empty {
+    min-height: 42px;
+    display: grid;
+    place-items: center;
+    border: 1px dashed #444;
+    color: #777;
+    font-size: 0.75em;
+}
+
+.observer-draft-banner {
+    position: relative;
+    min-height: 52px;
+    overflow: hidden;
+    border: 1px solid #555;
+    background: #252525;
+    animation: observer-banner-reveal 650ms ease-out both;
+    isolation: isolate;
+}
+
+.observer-team-column.blue .observer-draft-banner {
+    border-color: rgba(30, 136, 229, 0.55);
+}
+
+.observer-team-column.red .observer-draft-banner {
+    border-color: rgba(229, 57, 53, 0.55);
+}
+
+.observer-banner-group.bans .observer-draft-banner {
+    min-height: 40px;
+}
+
+.observer-draft-banner img {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+}
+
+.observer-draft-banner.ban-banner img {
+    filter: grayscale(100%);
+}
+
+.observer-banner-fallback {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    display: grid;
+    place-items: center;
+    color: #bbb;
+    font-weight: bold;
+}
+
+.observer-banner-name {
+    position: absolute;
+    inset: auto 0 0;
+    padding: 3px 6px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    color: #fff;
+    font-size: 0.75em;
+    font-weight: bold;
+    text-shadow: 0 1px 2px #000;
+}
+
+.observer-ban-symbol {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #ff3535;
+    font-size: 2.4em;
+    font-weight: bold;
+    line-height: 1;
+    text-shadow: 0 0 7px rgba(255, 0, 0, 0.8);
+    animation: observer-ban-symbol-fade 650ms ease-out both;
+}
+
+@keyframes observer-banner-reveal {
+    from {
+        opacity: 0;
+        transform: scale(0.86);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes observer-ban-symbol-fade {
+    0%,
+    45% {
+        opacity: 1;
+        transform: scale(0.7);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .observer-draft-banner,
+    .observer-ban-symbol {
+        animation: none;
+    }
+
+    .observer-ban-symbol {
+        opacity: 0;
+    }
+}
+
 #search-box {
     width: 80%;
     padding: 8px;
@@ -487,6 +661,20 @@ body {
 
 /* 在小屏幕上减少每行显示的英雄数量 */
 @media (max-width: 768px) {
+    .main-content {
+        gap: 8px;
+    }
+
+    .observer-draft-display {
+        width: 58%;
+        gap: 7px;
+        padding: 4px 7px;
+    }
+
+    .observer-banner-group.bans .observer-banner-list {
+        grid-template-columns: 1fr;
+    }
+
     #champion-pool {
         max-width: 100%;
         grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));

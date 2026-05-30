@@ -24,7 +24,11 @@ describe("competitive BP flow", () => {
   });
 
   it("applies empty bans without making a champion unavailable", () => {
-    const firstBan = applyEmptyBan(createInitialSessionState("competitive"), "EmptyBan_test");
+    const initial = {
+      ...createInitialSessionState("competitive"),
+      pendingChampionId: "Ahri",
+    };
+    const firstBan = applyEmptyBan(initial, "EmptyBan_test");
 
     expect(firstBan.ok).toBe(true);
     if (!firstBan.ok) {
@@ -34,12 +38,16 @@ describe("competitive BP flow", () => {
     expect(firstBan.state.blueBans).toEqual(["EmptyBan_test"]);
     expect(firstBan.state.currentStep).toBe(1);
     expect(firstBan.state.whosTurn).toBe("red");
+    expect(firstBan.state.pendingChampionId).toBeNull();
     expect(getUnavailableChampionIds(firstBan.state)).toEqual([]);
     expect(isChampionUnavailable(firstBan.state, "Aatrox")).toBe(false);
   });
 
   it("rejects duplicate champion selections across bans and picks", () => {
-    const initial = createInitialSessionState("competitive");
+    const initial = {
+      ...createInitialSessionState("competitive"),
+      pendingChampionId: "Ahri",
+    };
     const firstBan = applyChampionSelection(initial, "Ahri");
 
     expect(firstBan.ok).toBe(true);
@@ -47,6 +55,7 @@ describe("competitive BP flow", () => {
       return;
     }
 
+    expect(firstBan.state.pendingChampionId).toBeNull();
     const duplicateBan = applyChampionSelection(firstBan.state, "Ahri");
     expect(duplicateBan).toEqual({ ok: false, reason: "champion_unavailable" });
 

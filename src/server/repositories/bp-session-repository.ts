@@ -11,6 +11,7 @@ export interface LegacyBpSessionRecord {
   current_step: number | null;
   whos_turn: string | null;
   action_type: string | null;
+  pending_champion_id: string | null;
   blue_bans: string | null;
   red_bans: string | null;
   blue_picks: string | null;
@@ -26,6 +27,7 @@ export interface CreateBpSessionInput {
   current_step?: number;
   whos_turn?: string;
   action_type?: string;
+  pending_champion_id?: string | null;
   blue_bans?: JsonStringArrayValue;
   red_bans?: JsonStringArrayValue;
   blue_picks?: JsonStringArrayValue;
@@ -35,6 +37,11 @@ export interface CreateBpSessionInput {
 
 export interface UpdateBpSessionInput extends Partial<Omit<CreateBpSessionInput, "session_id">> {
   session_id: string;
+}
+
+export interface UpdatePendingChampionInput {
+  session_id: string;
+  pending_champion_id: string | null;
 }
 
 export async function findBpSessionById(
@@ -60,6 +67,7 @@ export async function createBpSession(
       currentStep: input.current_step ?? 0,
       whosTurn: input.whos_turn ?? "",
       actionType: input.action_type ?? "",
+      pendingChampionId: input.pending_champion_id ?? null,
       blueBans: encodeLegacyJsonArray(input.blue_bans),
       redBans: encodeLegacyJsonArray(input.red_bans),
       bluePicks: encodeLegacyJsonArray(input.blue_picks),
@@ -83,11 +91,26 @@ export async function updateBpSession(
       currentStep: input.current_step ?? 0,
       whosTurn: input.whos_turn ?? "",
       actionType: input.action_type ?? "",
+      pendingChampionId: input.pending_champion_id ?? null,
       blueBans: encodeLegacyJsonArray(input.blue_bans),
       redBans: encodeLegacyJsonArray(input.red_bans),
       bluePicks: encodeLegacyJsonArray(input.blue_picks),
       redPicks: encodeLegacyJsonArray(input.red_picks),
       systemBannedChampions: encodeLegacyJsonArray(input.system_banned_champions),
+    },
+  });
+
+  return toLegacyBpSessionRecord(session);
+}
+
+export async function updatePendingChampion(
+  input: UpdatePendingChampionInput,
+  client: PrismaClient = db,
+): Promise<LegacyBpSessionRecord> {
+  const session = await client.bpSession.update({
+    where: { sessionId: input.session_id },
+    data: {
+      pendingChampionId: input.pending_champion_id,
     },
   });
 
@@ -102,6 +125,7 @@ export function toLegacyBpSessionRecord(session: BpSession): LegacyBpSessionReco
     current_step: session.currentStep,
     whos_turn: session.whosTurn,
     action_type: session.actionType,
+    pending_champion_id: session.pendingChampionId,
     blue_bans: session.blueBans,
     red_bans: session.redBans,
     blue_picks: session.bluePicks,

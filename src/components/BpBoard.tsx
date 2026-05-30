@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { ChampionPool } from "@/src/components/ChampionPool";
+import { ObserverDraftDisplay } from "@/src/components/ObserverDraftDisplay";
 import { RefereePanel } from "@/src/components/RefereePanel";
 import { ShareLinks } from "@/src/components/ShareLinks";
 import { TeamPanel } from "@/src/components/TeamPanel";
@@ -73,15 +74,17 @@ export function BpBoard({ session, champions, tags, version, onBack }: BpBoardPr
             )}
           </span>
         </div>
-        <button
-          disabled={!session.pendingChampionId || !session.canAct}
-          id="confirm-button"
-          onClick={() => void session.confirmSelection()}
-          type="button"
-        >
-          确认选择
-        </button>
-        {session.state.actionType === "ban" && session.canAct ? (
+        {session.role !== "observer" ? (
+          <button
+            disabled={!session.pendingChampionId || !session.canAct}
+            id="confirm-button"
+            onClick={() => void session.confirmSelection()}
+            type="button"
+          >
+            确认选择
+          </button>
+        ) : null}
+        {session.role !== "observer" && session.state.actionType === "ban" && session.canAct ? (
           <button id="empty-ban-button" onClick={() => void session.emptyBan()} type="button">
             空 Ban
           </button>
@@ -123,15 +126,25 @@ export function BpBoard({ session, champions, tags, version, onBack }: BpBoardPr
           side="blue"
           version={version}
         />
-        <ChampionPool
-          champions={champions}
-          onSelectChampion={(championId) => void session.selectChampion(championId)}
-          pendingChampionId={session.pendingChampionId}
-          role={session.role}
-          state={session.state}
-          tags={tags}
-          version={version}
-        />
+        {session.role === "observer" ? (
+          <ObserverDraftDisplay
+            blueBans={session.state.blueBans}
+            bluePicks={session.state.bluePicks}
+            champions={champions}
+            redBans={session.state.redBans}
+            redPicks={session.state.redPicks}
+          />
+        ) : (
+          <ChampionPool
+            champions={champions}
+            onSelectChampion={(championId) => void session.selectChampion(championId)}
+            pendingChampionId={session.pendingChampionId}
+            role={session.role}
+            state={session.state}
+            tags={tags}
+            version={version}
+          />
+        )}
         <TeamPanel
           bans={session.state.redBans}
           champions={champions}

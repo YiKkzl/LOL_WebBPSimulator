@@ -34,6 +34,7 @@ export interface BpSessionState {
   currentPhase: BpPhase;
   whosTurn: TeamSide | "";
   actionType: BpActionType | "";
+  pendingChampionId: ChampionId | null;
   blueBans: ChampionId[];
   redBans: ChampionId[];
   bluePicks: ChampionId[];

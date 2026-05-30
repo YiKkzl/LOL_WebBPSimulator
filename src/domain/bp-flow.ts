@@ -74,7 +74,11 @@ export function syncTurnFromStep(state: BpSessionState): BpSessionState {
 }
 
 export function advanceTurn(state: BpSessionState): BpSessionState {
-  return syncTurnFromStep({ ...state, currentStep: state.currentStep + 1 });
+  return syncTurnFromStep({
+    ...state,
+    currentStep: state.currentStep + 1,
+    pendingChampionId: null,
+  });
 }
 
 export function applyChampionSelection(

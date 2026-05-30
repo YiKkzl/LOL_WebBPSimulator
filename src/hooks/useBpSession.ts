@@ -60,6 +60,7 @@ interface LegacySessionRecord {
   current_step?: number | string | null;
   whos_turn?: string | null;
   action_type?: string | null;
+  pending_champion_id?: string | null;
   blue_bans?: unknown;
   red_bans?: unknown;
   blue_picks?: unknown;
@@ -82,16 +83,57 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
   const [globalSessionId, setGlobalSessionId] = useState(options.globalSessionId ?? null);
   const [gameNumber, setGameNumber] = useState(options.gameNumber ?? 0);
   const [state, setState] = useState<BpSessionState>(emptySessionState);
-  const [pendingChampionId, setPendingChampionId] = useState<ChampionId | null>(null);
   const [previousGamesPicks, setPreviousGamesPicks] = useState<PreviousGamesPicks>({});
   const [isSessionActive, setIsSessionActive] = useState(Boolean(options.sessionId));
   const [isLoading, setIsLoading] = useState(Boolean(options.sessionId));
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const completedNoticeRef = useRef<string | null>(null);
+  const pendingSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSyncRequestRef = useRef(0);
 
   const currentTurn = useMemo(() => getBpTurn(state.mode, state.currentStep), [state]);
   const canAct = canRoleActOnTurn(role, currentTurn);
+
+  const cancelPendingChampionSync = useCallback(() => {
+    if (pendingSyncTimerRef.current) {
+      clearTimeout(pendingSyncTimerRef.current);
+      pendingSyncTimerRef.current = null;
+    }
+
+    pendingSyncRequestRef.current += 1;
+  }, []);
+
+  const schedulePendingChampionSync = useCallback(
+    (championId: ChampionId, expectedStep: number) => {
+      if (!sessionId) {
+        return;
+      }
+
+      cancelPendingChampionSync();
+      const requestId = pendingSyncRequestRef.current;
+
+      pendingSyncTimerRef.current = setTimeout(() => {
+        pendingSyncTimerRef.current = null;
+        void postLegacy<{ session_id: string; message: string }>("updatePendingChampion", {
+          session_id: sessionId,
+          pending_champion_id: championId,
+          expected_current_step: expectedStep,
+        }).then((response) => {
+          if (requestId !== pendingSyncRequestRef.current || response.status !== "error") {
+            return;
+          }
+
+          setError(response.message ?? "同步待选英雄失败");
+        });
+      }, 150);
+    },
+    [cancelPendingChampionSync, sessionId],
+  );
+
+  useEffect(() => {
+    return cancelPendingChampionSync;
+  }, [cancelPendingChampionSync, sessionId]);
 
   const saveSessionData = useCallback(
     async (nextState: BpSessionState, saveOptions: SaveOptions = {}) => {
@@ -221,23 +263,26 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
         setRole(nextRole);
         setGlobalSessionId(nextGlobalSessionId ?? null);
         setGameNumber(nextGameNumber);
-        const syncedState = syncTurnFromStep(nextState);
+        const syncedState = sanitizePendingChampion(syncTurnFromStep(nextState));
 
-        setState(syncedState);
-        setPendingChampionId((currentPendingChampionId) => {
-          if (!loadOptions.silent || !currentPendingChampionId) {
-            return null;
+        setState((currentState) => {
+          if (!loadOptions.silent || !currentState.pendingChampionId) {
+            return syncedState;
           }
 
           const nextTurn = getBpTurn(syncedState.mode, syncedState.currentStep);
           if (
+            currentState.currentStep !== syncedState.currentStep ||
             !canRoleActOnTurn(nextRole, nextTurn) ||
-            isChampionUnavailable(syncedState, currentPendingChampionId)
+            isChampionUnavailable(syncedState, currentState.pendingChampionId)
           ) {
-            return null;
+            return syncedState;
           }
 
-          return currentPendingChampionId;
+          return {
+            ...syncedState,
+            pendingChampionId: currentState.pendingChampionId,
+          };
         });
         setIsSessionActive(true);
         setError(null);
@@ -336,7 +381,6 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
     setGlobalSessionId(null);
     setGameNumber(0);
     setState(nextState);
-    setPendingChampionId(null);
     setIsSessionActive(true);
 
     const response = await postLegacy("createSession", toLegacySessionPayload(nextState, nextSessionId));
@@ -363,8 +407,13 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
       const nextSystemBans = state.systemBannedChampions.includes(championId)
         ? state.systemBannedChampions.filter((id) => id !== championId)
         : [...state.systemBannedChampions, championId];
-      const nextState = { ...state, systemBannedChampions: nextSystemBans };
+      const nextState = {
+        ...state,
+        pendingChampionId: state.pendingChampionId === championId ? null : state.pendingChampionId,
+        systemBannedChampions: nextSystemBans,
+      };
 
+      cancelPendingChampionSync();
       setState(nextState);
       const saved = await saveSessionData(nextState, {
         action: `system_ban_${championId}`,
@@ -375,7 +424,7 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
         await loadSession();
       }
     },
-    [loadSession, role, saveSessionData, state],
+    [cancelPendingChampionSync, loadSession, role, saveSessionData, state],
   );
 
   const selectChampion = useCallback(
@@ -393,31 +442,33 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
         return;
       }
 
-      setPendingChampionId(championId);
+      setState({ ...state, pendingChampionId: championId });
+      schedulePendingChampionSync(championId, state.currentStep);
     },
-    [canAct, role, state, toggleSystemBan],
+    [canAct, role, schedulePendingChampionSync, state, toggleSystemBan],
   );
 
   const confirmSelection = useCallback(async () => {
-    if (!pendingChampionId || !canAct) {
+    if (!state.pendingChampionId || !canAct) {
       return;
     }
 
-    const result = applyChampionSelection(state, pendingChampionId);
+    const confirmedChampionId = state.pendingChampionId;
+    const result = applyChampionSelection(state, confirmedChampionId);
     if (!result.ok) {
       return;
     }
 
+    cancelPendingChampionSync();
     setState(result.state);
-    setPendingChampionId(null);
     const saved = await saveSessionData(result.state, {
-      action: `${state.actionType}_${pendingChampionId}`,
+      action: `${state.actionType}_${confirmedChampionId}`,
       expectedStep: state.currentStep,
     });
     if (!saved) {
       await loadSession();
     }
-  }, [canAct, loadSession, pendingChampionId, saveSessionData, state]);
+  }, [canAct, cancelPendingChampionSync, loadSession, saveSessionData, state]);
 
   const emptyBan = useCallback(async () => {
     if (!canAct || state.actionType !== "ban") {
@@ -429,8 +480,8 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
       return;
     }
 
+    cancelPendingChampionSync();
     setState(result.state);
-    setPendingChampionId(null);
     const saved = await saveSessionData(result.state, {
       action: "empty_ban",
       expectedStep: state.currentStep,
@@ -438,20 +489,20 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
     if (!saved) {
       await loadSession();
     }
-  }, [canAct, loadSession, saveSessionData, state]);
+  }, [canAct, cancelPendingChampionSync, loadSession, saveSessionData, state]);
 
   const reset = useCallback(() => {
+    cancelPendingChampionSync();
     setSessionId(null);
     setRole("host");
     setGlobalSessionId(null);
     setGameNumber(0);
     setState(emptySessionState);
-    setPendingChampionId(null);
     setPreviousGamesPicks({});
     setIsSessionActive(false);
     setError(null);
     setNotice(null);
-  }, []);
+  }, [cancelPendingChampionSync]);
 
   return {
     sessionId,
@@ -460,7 +511,7 @@ export function useBpSession(options: UseBpSessionOptions = {}) {
     gameNumber,
     state,
     currentTurn,
-    pendingChampionId,
+    pendingChampionId: state.pendingChampionId,
     previousGamesPicks,
     isSessionActive,
     isLoading,
@@ -653,6 +704,7 @@ function fromLegacySessionRecord(record: LegacySessionRecord): BpSessionState {
     currentStep: Number(record.current_step ?? 0),
     whosTurn: record.whos_turn === "blue" || record.whos_turn === "red" ? record.whos_turn : "",
     actionType: record.action_type === "ban" || record.action_type === "pick" ? record.action_type : "",
+    pendingChampionId: normalizePendingChampionId(record.pending_champion_id),
     blueBans: decodeLegacyArray(record.blue_bans),
     redBans: decodeLegacyArray(record.red_bans),
     bluePicks: decodeLegacyArray(record.blue_picks),
@@ -669,12 +721,25 @@ function toLegacySessionPayload(state: BpSessionState, sessionId: string) {
     current_step: state.currentStep,
     whos_turn: state.whosTurn,
     action_type: state.actionType,
+    pending_champion_id: state.pendingChampionId,
     blue_bans: state.blueBans,
     red_bans: state.redBans,
     blue_picks: state.bluePicks,
     red_picks: state.redPicks,
     system_banned_champions: state.systemBannedChampions,
   };
+}
+
+function sanitizePendingChampion(state: BpSessionState): BpSessionState {
+  if (!state.pendingChampionId || !isChampionUnavailable(state, state.pendingChampionId)) {
+    return state;
+  }
+
+  return { ...state, pendingChampionId: null };
+}
+
+function normalizePendingChampionId(value: string | null | undefined) {
+  return value ? String(value) : null;
 }
 
 function decodeLegacyArray(value: unknown): string[] {

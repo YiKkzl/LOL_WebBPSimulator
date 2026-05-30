@@ -28,6 +28,15 @@ function createDependencies(): LegacyActionDependencies {
       sessions.set(input.session_id, record);
       return record;
     },
+    async updatePendingChampion(input) {
+      const existing = sessions.get(input.session_id);
+      const record = {
+        ...existing,
+        pending_champion_id: input.pending_champion_id,
+      };
+      sessions.set(input.session_id, record);
+      return record;
+    },
     async createSessionActivity(input) {
       activity.push(input);
       return input;
@@ -122,6 +131,7 @@ describe("legacy API actions", () => {
           current_step: 1,
           whos_turn: "red",
           action_type: "ban",
+          pending_champion_id: "Lux",
           blue_bans: ["Ahri"],
           red_bans: [],
           blue_picks: ["Ashe"],
@@ -155,6 +165,7 @@ describe("legacy API actions", () => {
         current_step: 1,
         whos_turn: "red",
         action_type: "ban",
+        pending_champion_id: "Lux",
         blue_bans: ["Ahri"],
         red_bans: [],
         blue_picks: ["Ashe"],
@@ -271,6 +282,111 @@ describe("legacy API actions", () => {
         blue_bans: [],
         red_bans: ["Ahri"],
       },
+    });
+  });
+
+  it("updates only the pending champion and rejects stale lightweight updates", async () => {
+    const dependencies = createDependencies();
+
+    await handleLegacyAction(
+      "POST",
+      "createSession",
+      new URLSearchParams(),
+      {
+        session_id: "test",
+        current_mode: "competitive",
+        current_step: 1,
+        red_bans: ["Ahri"],
+      },
+      dependencies,
+    );
+
+    await expect(
+      handleLegacyAction(
+        "POST",
+        "updatePendingChampion",
+        new URLSearchParams(),
+        {
+          session_id: "test",
+          pending_champion_id: "Akali",
+          expected_current_step: 1,
+        },
+        dependencies,
+      ),
+    ).resolves.toMatchObject({
+      status: "success",
+      data: {
+        session_id: "test",
+        pending_champion_id: "Akali",
+      },
+    });
+
+    await expect(
+      handleLegacyAction(
+        "GET",
+        "getSession",
+        new URLSearchParams("session_id=test"),
+        null,
+        dependencies,
+      ),
+    ).resolves.toMatchObject({
+      status: "success",
+      data: {
+        current_step: 1,
+        pending_champion_id: "Akali",
+        red_bans: ["Ahri"],
+      },
+    });
+
+    await expect(
+      handleLegacyAction(
+        "POST",
+        "updatePendingChampion",
+        new URLSearchParams(),
+        {
+          session_id: "test",
+          pending_champion_id: "Ashe",
+          expected_current_step: 0,
+        },
+        dependencies,
+      ),
+    ).resolves.toEqual({
+      status: "error",
+      message: "会话已更新，请刷新后重试",
+    });
+  });
+
+  it("rejects unavailable pending champions", async () => {
+    const dependencies = createDependencies();
+
+    await handleLegacyAction(
+      "POST",
+      "createSession",
+      new URLSearchParams(),
+      {
+        session_id: "test",
+        current_mode: "competitive",
+        current_step: 0,
+        system_banned_champions: ["Akali"],
+      },
+      dependencies,
+    );
+
+    await expect(
+      handleLegacyAction(
+        "POST",
+        "updatePendingChampion",
+        new URLSearchParams(),
+        {
+          session_id: "test",
+          pending_champion_id: "Akali",
+          expected_current_step: 0,
+        },
+        dependencies,
+      ),
+    ).resolves.toEqual({
+      status: "error",
+      message: "英雄不可用，请重新选择",
     });
   });
 
@@ -416,6 +532,7 @@ function toSessionRecord(input: CreateBpSessionInput, now: Date) {
     current_step: input.current_step ?? 0,
     whos_turn: input.whos_turn ?? "",
     action_type: input.action_type ?? "",
+    pending_champion_id: input.pending_champion_id ?? null,
     blue_bans: encodeArray(input.blue_bans),
     red_bans: encodeArray(input.red_bans),
     blue_picks: encodeArray(input.blue_picks),
