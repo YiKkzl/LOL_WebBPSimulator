@@ -51,7 +51,7 @@ Open generated role links in separate browser tabs:
 - Blue role can act only on blue turns.
 - Red role can act only on red turns.
 - Observer role cannot select champions or use empty ban.
-- Observer role replaces the champion pool with blue/red splash banners grouped into Picks and Bans.
+- Observer role replaces the champion pool with blue/red lightweight loading-art banners grouped into Picks and Bans.
 - Selecting a champion updates the pending champion label in every open role tab before confirmation.
 - Confirmed bans briefly show a red prohibition symbol and remain grayscale; empty bans render a placeholder banner.
 - Referee role can open referee controls.

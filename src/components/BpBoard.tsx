@@ -131,8 +131,10 @@ export function BpBoard({ session, champions, tags, version, onBack }: BpBoardPr
             blueBans={session.state.blueBans}
             bluePicks={session.state.bluePicks}
             champions={champions}
+            pendingChampionId={session.pendingChampionId}
             redBans={session.state.redBans}
             redPicks={session.state.redPicks}
+            version={version}
           />
         ) : (
           <ChampionPool

@@ -502,11 +502,20 @@ body {
 .observer-draft-banner img {
     position: absolute;
     inset: 0;
-    z-index: -1;
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center 20%;
+}
+
+.observer-banner-placeholder {
+    z-index: 1;
+    filter: blur(2px);
+    transform: scale(1.12);
+}
+
+.observer-banner-art {
+    z-index: 2;
 }
 
 .observer-draft-banner.ban-banner img {
@@ -516,7 +525,7 @@ body {
 .observer-banner-fallback {
     position: absolute;
     inset: 0;
-    z-index: -2;
+    z-index: 0;
     display: grid;
     place-items: center;
     color: #bbb;
@@ -526,6 +535,7 @@ body {
 .observer-banner-name {
     position: absolute;
     inset: auto 0 0;
+    z-index: 3;
     padding: 3px 6px;
     background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
     color: #fff;
@@ -537,6 +547,7 @@ body {
 .observer-ban-symbol {
     position: absolute;
     inset: 0;
+    z-index: 4;
     display: grid;
     place-items: center;
     color: #ff3535;

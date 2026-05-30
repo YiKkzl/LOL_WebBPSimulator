@@ -63,7 +63,7 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(observerPage.locator("#pending-champion")).toHaveText("无");
   await expect(observerPage.locator('[data-action-type="ban"][data-champion-id="Aatrox"]')).toBeVisible();
   await expect(
-    observerPage.locator('[data-action-type="ban"][data-champion-id="Aatrox"] img'),
+    observerPage.locator('[data-action-type="ban"][data-champion-id="Aatrox"] .observer-banner-art'),
   ).toHaveCSS("filter", "grayscale(1)");
   await expect(
     observerPage.locator('[data-action-type="ban"][data-champion-id="Aatrox"] .observer-ban-symbol'),
@@ -94,8 +94,8 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await waitAction(redPage, "红方 选用 P1");
   await expect(observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]')).toBeVisible();
   await expect(
-    observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"] img'),
-  ).toHaveAttribute("src", /\/cdn\/img\/champion\/splash\/Garen_0\.jpg$/);
+    observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"] .observer-banner-art'),
+  ).toHaveAttribute("src", /\/cdn\/img\/champion\/loading\/Garen_0\.jpg$/);
 
   await selectAndConfirm(redPage, "Darius");
   await waitAction(bluePage, "红方 选用 P2");
@@ -129,7 +129,7 @@ async function mockDataDragon(context: BrowserContext) {
       body: Buffer.from(tinyPng, "base64"),
     });
   });
-  await context.route(/https:\/\/ddragon\.leagueoflegends\.com\/cdn\/img\/champion\/splash\/.+\.jpg/, async (route) => {
+  await context.route(/https:\/\/ddragon\.leagueoflegends\.com\/cdn\/img\/champion\/loading\/.+\.jpg/, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "image/png",
