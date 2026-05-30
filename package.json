@@ -12,7 +12,7 @@
     "typecheck": "next typegen && tsc --noEmit --incremental false"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.0",
+    "@prisma/client": "6.19.3",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6"
@@ -24,7 +24,7 @@
     "@types/react-dom": "19.2.3",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
-    "prisma": "^6.19.0",
+    "prisma": "6.19.3",
     "typescript": "6.0.3",
     "vitest": "^4.1.7"
   }
