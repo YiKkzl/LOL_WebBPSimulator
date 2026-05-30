@@ -50,6 +50,8 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(observerPage.locator("#champion-pool")).toHaveCount(0);
   await expect(observerPage.locator("#confirm-button")).toHaveCount(0);
   await expect(observerPage.locator("#empty-ban-button")).toHaveCount(0);
+  await expect(observerPage.locator("#observer-draft-display .observer-banner-group h4")).toHaveCount(0);
+  await expect(observerPage.locator("#observer-draft-display [data-pick-slot]")).toHaveCount(10);
 
   await bluePage.locator("#empty-ban-button").click();
   await waitAction(redPage, "红方 禁用 B1");
@@ -83,6 +85,7 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(
     observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"] .observer-banner-art'),
   ).toHaveAttribute("src", /\/cdn\/img\/champion\/loading\/Garen_0\.jpg$/);
+  await expect(observerPage.locator("#observer-draft-display [data-pick-slot]")).toHaveCount(9);
   await expect
     .poll(async () => (await observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]').boundingBox())?.height)
     .toBeGreaterThanOrEqual(86);

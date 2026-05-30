@@ -72,9 +72,7 @@ function ObserverTeamColumn({
       <ObserverBannerGroup
         championById={championById}
         championIds={picks}
-        emptyText="等待选用"
         side={side}
-        title="Picks"
         version={version}
       />
     </section>
@@ -84,26 +82,21 @@ function ObserverTeamColumn({
 function ObserverBannerGroup({
   championById,
   championIds,
-  emptyText,
   side,
-  title,
   version,
 }: {
   championById: Map<string, ChampionData>;
   championIds: string[];
-  emptyText: string;
   side: TeamSide;
-  title: string;
   version: string;
 }) {
   return (
-    <div className="observer-banner-group picks">
-      <h4>{title}</h4>
+    <div className="observer-banner-group">
       <div className="observer-banner-list">
-        {championIds.length === 0 ? (
-          <div className="observer-banner-empty">{emptyText}</div>
-        ) : (
-          championIds.map((championId) => (
+        {Array.from({ length: 5 }, (_, index) => {
+          const championId = championIds[index];
+
+          return championId ? (
             <ObserverChampionBanner
               champion={championById.get(championId)}
               championId={championId}
@@ -111,8 +104,12 @@ function ObserverBannerGroup({
               side={side}
               version={version}
             />
-          ))
-        )}
+          ) : (
+            <div className="observer-banner-empty" data-pick-slot={index + 1} key={index}>
+              P{index + 1}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
