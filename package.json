@@ -7,6 +7,7 @@
     "dev": "next dev",
     "e2e": "docker compose up -d --wait lolbp-mysql && playwright test",
     "lint": "eslint .",
+    "review:local": "powershell -ExecutionPolicy Bypass -File scripts/start-local-review.ps1",
     "start": "next start",
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit --incremental false"

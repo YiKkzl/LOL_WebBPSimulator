@@ -308,7 +308,7 @@ body {
 }
 
 .observer-layout .observer-draft-display {
-    width: 75%;
+    width: 82%;
     margin: 0 auto;
     min-height: 560px;
 }
@@ -465,7 +465,7 @@ body {
     border: 1px dashed #444;
     color: #777;
     font-size: 0.75em;
-    aspect-ratio: 1215 / 717;
+    aspect-ratio: 1215 / 574;
     height: 100%;
     max-width: 100%;
     min-width: 0;
@@ -477,7 +477,7 @@ body {
     border: 1px solid #555;
     background: #252525;
     animation: observer-banner-reveal 650ms ease-out both;
-    aspect-ratio: 1215 / 717;
+    aspect-ratio: 1215 / 574;
     height: 100%;
     max-width: 100%;
     min-width: 0;
@@ -630,7 +630,7 @@ body {
 }
 
 .observer-ban-slot.empty-ban {
-    color: #aaa;
+    color: #777;
     background: #2a2a2a;
 }
 
@@ -650,6 +650,12 @@ body {
     padding: 2px 5px;
     background: rgba(0, 0, 0, 0.58);
     text-shadow: 0 1px 2px #000;
+}
+
+.observer-ban-slot.empty-ban span {
+    padding: 0;
+    background: transparent;
+    text-shadow: none;
 }
 
 @keyframes observer-banner-reveal {
@@ -759,7 +765,7 @@ body {
     }
 
     .observer-layout .observer-draft-display {
-        width: 75%;
+        width: 82%;
         min-height: 500px;
     }
 

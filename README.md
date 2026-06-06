@@ -25,22 +25,25 @@ YiKk_LOLBP 是一个基于 Next.js 的英雄联盟 BP（禁用/选择）模拟�
 
 ## 本地开发
 
-启动本地测试数据库：
-
-```powershell
-docker compose up -d lolbp-mysql
-```
-
-设置数据库连接：
-
-```powershell
-$env:DATABASE_URL="mysql://lolbp:lolbp_dev_password@127.0.0.1:3307/lolbp_test"
-```
-
-安装依赖并启动开发服务：
+一键启动本地预览环境：
 
 ```powershell
 npm install
+npm run review:local
+```
+
+启动后访问 `http://localhost:3000/`。脚本会自动启动 Docker MySQL、设置本地 `DATABASE_URL`、同步 Prisma schema，并启动 Next.js dev server。
+
+如需指定端口：
+
+```powershell
+npm run review:local -- -Port 3100
+```
+
+手动启动时使用同一本地数据库连接：
+
+```powershell
+$env:DATABASE_URL="mysql://lolbp:lolbp_dev_password@127.0.0.1:3307/lolbp_test"
 npm run dev
 ```
 

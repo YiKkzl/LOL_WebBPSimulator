@@ -49,7 +49,7 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(observerPage.locator("#observer-draft-display")).toBeVisible();
   await expect
     .poll(() => widthRatio(observerPage.locator("#observer-draft-display"), observerPage.locator(".main-content")))
-    .toBeCloseTo(0.75, 1);
+    .toBeCloseTo(0.82, 1);
   await expect(observerPage.locator("#champion-pool")).toHaveCount(0);
   await expect(observerPage.locator("#confirm-button")).toHaveCount(0);
   await expect(observerPage.locator("#empty-ban-button")).toHaveCount(0);
@@ -69,6 +69,10 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await waitAction(redPage, "红方 禁用 B1");
   await expect(observerPage.locator('#observer-ban-strip [data-empty-ban="true"]')).toBeVisible();
   await expect(observerPage.locator('#observer-ban-strip [data-empty-ban="true"]')).toHaveText("空");
+  await expect(observerPage.locator('#observer-ban-strip [data-empty-ban="true"] span')).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
 
   await redPage.locator('#champion-pool [data-id="Aatrox"]').click();
   await expect(redPage.locator("#confirm-button")).toBeEnabled();
@@ -107,7 +111,7 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
     .poll(async () => (await observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]').boundingBox())?.height)
     .toBeGreaterThanOrEqual(86);
   await expect
-    .poll(async () => aspectRatioDelta(observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]'), 1215 / 717))
+    .poll(async () => aspectRatioDelta(observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]'), 1215 / 574))
     .toBeLessThanOrEqual(0.03);
   const lateObserverPage = await browser.newPage();
   await mockDataDragon(lateObserverPage.context());
