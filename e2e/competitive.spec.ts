@@ -50,12 +50,18 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(observerPage.locator("#champion-pool")).toHaveCount(0);
   await expect(observerPage.locator("#confirm-button")).toHaveCount(0);
   await expect(observerPage.locator("#empty-ban-button")).toHaveCount(0);
+  await expect(observerPage.locator(".team-panel")).toHaveCount(0);
+  await expect(observerPage.locator("#observer-draft-display h3, #observer-draft-display h4")).toHaveCount(0);
   await expect(observerPage.locator("#observer-draft-display .observer-banner-group h4")).toHaveCount(0);
   await expect(observerPage.locator("#observer-draft-display [data-pick-slot]")).toHaveCount(10);
+  await expect(observerPage.locator("#observer-ban-strip")).toBeVisible();
+  await expect(observerPage.locator("#observer-ban-strip [data-observer-ban-slot]")).toHaveCount(10);
+  await expect(observerPage.locator("#observer-ban-strip .observer-ban-side.blue [data-observer-ban-slot]")).toHaveCount(5);
+  await expect(observerPage.locator("#observer-ban-strip .observer-ban-side.red [data-observer-ban-slot]")).toHaveCount(5);
 
   await bluePage.locator("#empty-ban-button").click();
   await waitAction(redPage, "红方 禁用 B1");
-  await expect(observerPage.locator('[data-empty-ban="true"]')).toHaveCount(0);
+  await expect(observerPage.locator('#observer-ban-strip [data-empty-ban="true"]')).toBeVisible();
 
   await redPage.locator('#champion-pool [data-id="Aatrox"]').click();
   await expect(redPage.locator("#confirm-button")).toBeEnabled();
@@ -63,8 +69,12 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(bluePage.locator("#pending-champion")).toContainText("暗裔剑魔");
   await redPage.locator("#confirm-button").click();
   await expect(observerPage.locator("#pending-champion")).toHaveText("无");
-  await expect(observerPage.locator('[data-action-type="ban"]')).toHaveCount(0);
-  await expect(observerPage.locator('[data-champion-id="Aatrox"]')).toHaveCount(0);
+  await expect(observerPage.locator('#observer-draft-display [data-action-type="ban"]')).toHaveCount(0);
+  await expect(observerPage.locator('#observer-draft-display [data-champion-id="Aatrox"]')).toHaveCount(0);
+  await expect(observerPage.locator('#observer-ban-strip [data-action-type="ban"]')).toHaveCount(2);
+  await expect(observerPage.locator('#observer-ban-strip [data-champion-id="Aatrox"]')).toBeVisible();
+  await expect(observerPage.locator('#observer-ban-strip [data-champion-id="Aatrox"] img')).toBeVisible();
+  await expect(observerPage.locator('#observer-ban-strip [data-champion-id="Aatrox"] span')).toHaveCount(0);
   await waitAction(bluePage, "蓝方 禁用 B2");
 
   await selectAndConfirm(bluePage, "Ahri");
@@ -96,7 +106,8 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(
     lateObserverPage.locator('[data-action-type="pick"][data-champion-id="Garen"]'),
   ).toHaveCSS("animation-name", "observer-banner-reveal");
-  await expect(lateObserverPage.locator('[data-action-type="ban"]')).toHaveCount(0);
+  await expect(lateObserverPage.locator('#observer-draft-display [data-action-type="ban"]')).toHaveCount(0);
+  await expect(lateObserverPage.locator('#observer-ban-strip [data-action-type="ban"]')).toHaveCount(6);
   await lateObserverPage.close();
 
   await selectAndConfirm(redPage, "Darius");

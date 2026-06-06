@@ -302,6 +302,16 @@ body {
     padding-bottom: 5px;
     border-bottom: 1px solid #444; /* 深色边框 */
 }
+
+.main-content.observer-layout {
+    display: block;
+}
+
+.observer-layout .observer-draft-display {
+    width: 100%;
+    min-height: 560px;
+}
+
 .team-panel h4 {
     font-size: 0.9em;
     color: #ccc; /* 浅灰色文字 */
@@ -416,7 +426,7 @@ body {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
     gap: 14px;
-    padding: 4px 14px;
+    padding: 14px;
     background:
         radial-gradient(circle at center, rgba(209, 169, 84, 0.08), transparent 55%),
         #1f1f1f;
@@ -434,25 +444,10 @@ body {
     flex-direction: column;
 }
 
-.observer-team-column h3 {
-    margin: 0;
-    text-align: center;
-    letter-spacing: 1px;
-}
-
-.observer-team-column.blue h3 {
-    color: #90caf9;
-}
-
-.observer-team-column.red h3 {
-    color: #ef9a9a;
-}
-
 .observer-banner-group {
     flex: 1;
     display: flex;
     flex-direction: column;
-    margin-top: 12px;
 }
 
 .observer-banner-list {
@@ -481,10 +476,28 @@ body {
 
 .observer-team-column.blue .observer-draft-banner {
     border-color: rgba(30, 136, 229, 0.55);
+    background:
+        linear-gradient(90deg, rgba(30, 136, 229, 0.38), rgba(30, 136, 229, 0.08)),
+        #141d28;
+    box-shadow: inset 0 0 34px rgba(30, 136, 229, 0.18);
 }
 
 .observer-team-column.red .observer-draft-banner {
     border-color: rgba(229, 57, 53, 0.55);
+    background:
+        linear-gradient(270deg, rgba(229, 57, 53, 0.38), rgba(229, 57, 53, 0.08)),
+        #281818;
+    box-shadow: inset 0 0 34px rgba(229, 57, 53, 0.18);
+}
+
+.observer-team-column.blue .observer-banner-empty {
+    border-color: rgba(30, 136, 229, 0.38);
+    background: rgba(30, 136, 229, 0.08);
+}
+
+.observer-team-column.red .observer-banner-empty {
+    border-color: rgba(229, 57, 53, 0.38);
+    background: rgba(229, 57, 53, 0.08);
 }
 
 .observer-draft-banner img {
@@ -525,6 +538,101 @@ body {
     color: #fff;
     font-size: 0.75em;
     font-weight: bold;
+    text-shadow: 0 1px 2px #000;
+}
+
+.observer-ban-strip {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+    gap: 14px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background:
+        linear-gradient(90deg, rgba(30, 136, 229, 0.12), transparent 45%, transparent 55%, rgba(229, 57, 53, 0.12)),
+        #1f1f1f;
+    border: 1px solid #333;
+}
+
+.observer-ban-divider {
+    background: linear-gradient(transparent, rgba(209, 169, 84, 0.55), transparent);
+}
+
+.observer-ban-side {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: repeat(2, 42px);
+    gap: 7px;
+    min-width: 0;
+}
+
+.observer-ban-slot {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px dashed #555;
+    background: #222;
+    color: #777;
+    font-size: 0.72em;
+    font-weight: bold;
+}
+
+.observer-ban-slot:nth-child(1) {
+    grid-column: 1 / 3;
+}
+
+.observer-ban-slot:nth-child(2) {
+    grid-column: 3 / 5;
+}
+
+.observer-ban-slot:nth-child(3) {
+    grid-column: 5 / 7;
+}
+
+.observer-ban-slot:nth-child(4) {
+    grid-column: 2 / 4;
+}
+
+.observer-ban-slot:nth-child(5) {
+    grid-column: 4 / 6;
+}
+
+.observer-ban-slot.filled {
+    border-style: solid;
+    color: #ddd;
+}
+
+.observer-ban-side.blue .observer-ban-slot.filled {
+    border-color: rgba(30, 136, 229, 0.65);
+    background: rgba(30, 136, 229, 0.1);
+}
+
+.observer-ban-side.red .observer-ban-slot.filled {
+    border-color: rgba(229, 57, 53, 0.65);
+    background: rgba(229, 57, 53, 0.1);
+}
+
+.observer-ban-slot.empty-ban {
+    color: #aaa;
+    background: #2a2a2a;
+}
+
+.observer-ban-slot img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%);
+    opacity: 0.9;
+}
+
+.observer-ban-slot span {
+    position: relative;
+    z-index: 1;
+    padding: 2px 5px;
+    background: rgba(0, 0, 0, 0.58);
     text-shadow: 0 1px 2px #000;
 }
 
@@ -632,6 +740,21 @@ body {
         width: 58%;
         gap: 7px;
         padding: 4px 7px;
+    }
+
+    .observer-layout .observer-draft-display {
+        width: 100%;
+        min-height: 500px;
+    }
+
+    .observer-ban-strip {
+        gap: 7px;
+        padding: 8px 7px;
+    }
+
+    .observer-ban-side {
+        grid-template-rows: repeat(2, 36px);
+        gap: 5px;
     }
 
     #champion-pool {

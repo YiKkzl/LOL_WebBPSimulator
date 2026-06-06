@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { ChampionPool } from "@/src/components/ChampionPool";
-import { ObserverDraftDisplay } from "@/src/components/ObserverDraftDisplay";
+import { ObserverBanStrip, ObserverDraftDisplay } from "@/src/components/ObserverDraftDisplay";
 import { RefereePanel } from "@/src/components/RefereePanel";
 import { ShareLinks } from "@/src/components/ShareLinks";
 import { TeamPanel } from "@/src/components/TeamPanel";
@@ -118,14 +118,7 @@ export function BpBoard({ session, champions, tags, version, onBack }: BpBoardPr
         />
       ) : null}
 
-      <div className="main-content">
-        <TeamPanel
-          bans={session.state.blueBans}
-          champions={champions}
-          picks={session.state.bluePicks}
-          side="blue"
-          version={version}
-        />
+      <div className={`main-content ${session.role === "observer" ? "observer-layout" : ""}`}>
         {session.role === "observer" ? (
           <ObserverDraftDisplay
             bluePicks={session.state.bluePicks}
@@ -135,24 +128,42 @@ export function BpBoard({ session, champions, tags, version, onBack }: BpBoardPr
             version={version}
           />
         ) : (
-          <ChampionPool
-            champions={champions}
-            onSelectChampion={(championId) => void session.selectChampion(championId)}
-            pendingChampionId={session.pendingChampionId}
-            role={session.role}
-            state={session.state}
-            tags={tags}
-            version={version}
-          />
+          <>
+            <TeamPanel
+              bans={session.state.blueBans}
+              champions={champions}
+              picks={session.state.bluePicks}
+              side="blue"
+              version={version}
+            />
+            <ChampionPool
+              champions={champions}
+              onSelectChampion={(championId) => void session.selectChampion(championId)}
+              pendingChampionId={session.pendingChampionId}
+              role={session.role}
+              state={session.state}
+              tags={tags}
+              version={version}
+            />
+            <TeamPanel
+              bans={session.state.redBans}
+              champions={champions}
+              picks={session.state.redPicks}
+              side="red"
+              version={version}
+            />
+          </>
         )}
-        <TeamPanel
-          bans={session.state.redBans}
+      </div>
+
+      {session.role === "observer" ? (
+        <ObserverBanStrip
+          blueBans={session.state.blueBans}
           champions={champions}
-          picks={session.state.redPicks}
-          side="red"
+          redBans={session.state.redBans}
           version={version}
         />
-      </div>
+      ) : null}
 
       <RefereePanel
         canUnban={session.role === "referee"}
