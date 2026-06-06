@@ -97,11 +97,14 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]')).toBeVisible();
   await expect(
     observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"] .observer-banner-art'),
-  ).toHaveAttribute("src", /\/cdn\/img\/champion\/loading\/Garen_0\.jpg$/);
+  ).toHaveAttribute("src", /\/cdn\/img\/champion\/splash\/Garen_0\.jpg$/);
   await expect(observerPage.locator("#observer-draft-display [data-pick-slot]")).toHaveCount(9);
   await expect
     .poll(async () => (await observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]').boundingBox())?.height)
     .toBeGreaterThanOrEqual(86);
+  await expect
+    .poll(async () => aspectRatioDelta(observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]'), 1215 / 717))
+    .toBeLessThanOrEqual(0.03);
   const lateObserverPage = await browser.newPage();
   await mockDataDragon(lateObserverPage.context());
   await lateObserverPage.goto(observerUrl);
@@ -145,7 +148,7 @@ async function mockDataDragon(context: BrowserContext) {
       body: Buffer.from(tinyPng, "base64"),
     });
   });
-  await context.route(/https:\/\/ddragon\.leagueoflegends\.com\/cdn\/img\/champion\/loading\/.+\.jpg/, async (route) => {
+  await context.route(/https:\/\/ddragon\.leagueoflegends\.com\/cdn\/img\/champion\/(?:loading|splash)\/.+\.jpg/, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "image/png",
@@ -173,6 +176,11 @@ async function selectAndConfirm(page: Page, championId: string) {
 async function squareDelta(locator: ReturnType<Page["locator"]>) {
   const box = await locator.boundingBox();
   return box ? Math.abs(box.width - box.height) : Number.POSITIVE_INFINITY;
+}
+
+async function aspectRatioDelta(locator: ReturnType<Page["locator"]>, expectedRatio: number) {
+  const box = await locator.boundingBox();
+  return box ? Math.abs(box.width / box.height - expectedRatio) : Number.POSITIVE_INFINITY;
 }
 
 function champion(id: string, name: string, title: string, tag: string) {

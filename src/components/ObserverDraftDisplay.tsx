@@ -257,5 +257,5 @@ function ObserverBanSlot({
 }
 
 function getObserverBannerArtUrl(championId: string) {
-  return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${championId}_0.jpg`;
+  return `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championId}_0.jpg`;
 }
