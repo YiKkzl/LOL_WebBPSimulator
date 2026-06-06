@@ -230,7 +230,7 @@ function ObserverBanSlot({
   version: string;
 }) {
   const emptyBan = championId ? isEmptyBan(championId) : false;
-  const label = championId ? (emptyBan ? "空 Ban" : (champion?.name ?? championId)) : `B${index + 1}`;
+  const label = championId ? (emptyBan ? "空" : (champion?.name ?? championId)) : `B${index + 1}`;
 
   return (
     <div

@@ -308,7 +308,8 @@ body {
 }
 
 .observer-layout .observer-draft-display {
-    width: 100%;
+    width: 75%;
+    margin: 0 auto;
     min-height: 560px;
 }
 
@@ -758,7 +759,7 @@ body {
     }
 
     .observer-layout .observer-draft-display {
-        width: 100%;
+        width: 75%;
         min-height: 500px;
     }
 

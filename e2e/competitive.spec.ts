@@ -47,6 +47,9 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(redPage.locator("#confirm-button")).toBeDisabled();
   await expect(observerPage.locator("#observer-notice")).toContainText("观战模式");
   await expect(observerPage.locator("#observer-draft-display")).toBeVisible();
+  await expect
+    .poll(() => widthRatio(observerPage.locator("#observer-draft-display"), observerPage.locator(".main-content")))
+    .toBeCloseTo(0.75, 1);
   await expect(observerPage.locator("#champion-pool")).toHaveCount(0);
   await expect(observerPage.locator("#confirm-button")).toHaveCount(0);
   await expect(observerPage.locator("#empty-ban-button")).toHaveCount(0);
@@ -65,6 +68,7 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await bluePage.locator("#empty-ban-button").click();
   await waitAction(redPage, "红方 禁用 B1");
   await expect(observerPage.locator('#observer-ban-strip [data-empty-ban="true"]')).toBeVisible();
+  await expect(observerPage.locator('#observer-ban-strip [data-empty-ban="true"]')).toHaveText("空");
 
   await redPage.locator('#champion-pool [data-id="Aatrox"]').click();
   await expect(redPage.locator("#confirm-button")).toBeEnabled();
@@ -181,6 +185,15 @@ async function squareDelta(locator: ReturnType<Page["locator"]>) {
 async function aspectRatioDelta(locator: ReturnType<Page["locator"]>, expectedRatio: number) {
   const box = await locator.boundingBox();
   return box ? Math.abs(box.width / box.height - expectedRatio) : Number.POSITIVE_INFINITY;
+}
+
+async function widthRatio(numerator: ReturnType<Page["locator"]>, denominator: ReturnType<Page["locator"]>) {
+  const numeratorBox = await numerator.boundingBox();
+  const denominatorBox = await denominator.boundingBox();
+  if (!numeratorBox || !denominatorBox || denominatorBox.width === 0) {
+    return 0;
+  }
+  return numeratorBox.width / denominatorBox.width;
 }
 
 function champion(id: string, name: string, title: string, tag: string) {
