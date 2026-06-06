@@ -58,6 +58,9 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(observerPage.locator("#observer-ban-strip [data-observer-ban-slot]")).toHaveCount(10);
   await expect(observerPage.locator("#observer-ban-strip .observer-ban-side.blue [data-observer-ban-slot]")).toHaveCount(5);
   await expect(observerPage.locator("#observer-ban-strip .observer-ban-side.red [data-observer-ban-slot]")).toHaveCount(5);
+  await expect
+    .poll(async () => squareDelta(observerPage.locator("#observer-ban-strip [data-observer-ban-slot]").first()))
+    .toBeLessThanOrEqual(1);
 
   await bluePage.locator("#empty-ban-button").click();
   await waitAction(redPage, "红方 禁用 B1");
@@ -165,6 +168,11 @@ async function selectAndConfirm(page: Page, championId: string) {
   await page.waitForTimeout(650);
   await expect(page.locator("#confirm-button")).toBeEnabled();
   await page.locator("#confirm-button").click();
+}
+
+async function squareDelta(locator: ReturnType<Page["locator"]>) {
+  const box = await locator.boundingBox();
+  return box ? Math.abs(box.width - box.height) : Number.POSITIVE_INFINITY;
 }
 
 function champion(id: string, name: string, title: string, tag: string) {

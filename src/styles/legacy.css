@@ -560,9 +560,10 @@ body {
 
 .observer-ban-side {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(6, 21px);
     grid-template-rows: repeat(2, 42px);
     gap: 7px;
+    justify-content: center;
     min-width: 0;
 }
 
@@ -570,12 +571,17 @@ body {
     position: relative;
     display: grid;
     place-items: center;
+    justify-self: center;
+    align-self: center;
     overflow: hidden;
     border: 1px dashed #555;
     background: #222;
     color: #777;
     font-size: 0.72em;
     font-weight: bold;
+    width: 42px;
+    height: 42px;
+    aspect-ratio: 1;
 }
 
 .observer-ban-slot:nth-child(1) {
@@ -753,8 +759,14 @@ body {
     }
 
     .observer-ban-side {
+        grid-template-columns: repeat(6, 18px);
         grid-template-rows: repeat(2, 36px);
         gap: 5px;
+    }
+
+    .observer-ban-slot {
+        width: 36px;
+        height: 36px;
     }
 
     #champion-pool {
