@@ -22,7 +22,7 @@ source "${CONFIG_DIR}/mysql.env"
 
 DATABASE_URL="mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@127.0.0.1:3306/${MYSQL_DATABASE}"
 
-echo "[1/6] Fetching ${BRANCH}"
+echo "[1/7] Fetching ${BRANCH}"
 git config --global --add safe.directory "${APP_DIR}" >/dev/null 2>&1 || true
 cd "${APP_DIR}"
 git fetch origin "${BRANCH}"
@@ -30,7 +30,7 @@ git checkout "${BRANCH}"
 git reset --hard "origin/${BRANCH}"
 chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}"
 
-echo "[2/6] Writing app environment"
+echo "[2/7] Writing app environment"
 cat > "${CONFIG_DIR}/lolbp.env" <<ENV
 NODE_ENV=production
 PORT=3000
@@ -39,17 +39,22 @@ DATABASE_URL=${DATABASE_URL}
 ENV
 chmod 600 "${CONFIG_DIR}/lolbp.env"
 
-echo "[3/6] Installing dependencies"
+echo "[3/7] Installing dependencies"
 sudo -u "${APP_USER}" env DATABASE_URL="${DATABASE_URL}" npm ci
 
-echo "[4/6] Applying Prisma schema"
+echo "[4/7] Applying Prisma schema"
 sudo -u "${APP_USER}" env DATABASE_URL="${DATABASE_URL}" npx prisma generate
 sudo -u "${APP_USER}" env DATABASE_URL="${DATABASE_URL}" npx prisma db push
 
-echo "[5/6] Building application"
+echo "[5/7] Installing BP data cleanup event"
+mysql --protocol=socket --user=root --execute="SET PERSIST event_scheduler = ON"
+mysql --protocol=socket --user=root --database="${MYSQL_DATABASE}" \
+  < "${APP_DIR}/scripts/mysql/cleanup-expired-bp-data.sql"
+
+echo "[6/7] Building application"
 sudo -u "${APP_USER}" env DATABASE_URL="${DATABASE_URL}" NEXT_TELEMETRY_DISABLED=1 npm run build
 
-echo "[6/6] Restarting service"
+echo "[7/7] Restarting service"
 systemctl restart lolbp
 sleep 3
 systemctl --no-pager --full status lolbp | sed -n '1,12p'
