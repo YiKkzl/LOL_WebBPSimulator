@@ -49,7 +49,7 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
   await expect(observerPage.locator("#observer-draft-display")).toBeVisible();
   await expect
     .poll(() => widthRatio(observerPage.locator("#observer-draft-display"), observerPage.locator(".main-content")))
-    .toBeCloseTo(0.82, 1);
+    .toBeCloseTo(1, 1);
   await expect(observerPage.locator("#champion-pool")).toHaveCount(0);
   await expect(observerPage.locator("#confirm-button")).toHaveCount(0);
   await expect(observerPage.locator("#empty-ban-button")).toHaveCount(0);
@@ -111,8 +111,13 @@ test("competitive BP supports shared role links, empty ban, bans, and picks", as
     .poll(async () => (await observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]').boundingBox())?.height)
     .toBeGreaterThanOrEqual(86);
   await expect
-    .poll(async () => aspectRatioDelta(observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]'), 1215 / 574))
-    .toBeLessThanOrEqual(0.03);
+    .poll(() =>
+      widthRatio(
+        observerPage.locator('[data-action-type="pick"][data-champion-id="Garen"]'),
+        observerPage.locator(".observer-team-column.blue"),
+      ),
+    )
+    .toBeCloseTo(1, 1);
   const lateObserverPage = await browser.newPage();
   await mockDataDragon(lateObserverPage.context());
   await lateObserverPage.goto(observerUrl);
@@ -184,11 +189,6 @@ async function selectAndConfirm(page: Page, championId: string) {
 async function squareDelta(locator: ReturnType<Page["locator"]>) {
   const box = await locator.boundingBox();
   return box ? Math.abs(box.width - box.height) : Number.POSITIVE_INFINITY;
-}
-
-async function aspectRatioDelta(locator: ReturnType<Page["locator"]>, expectedRatio: number) {
-  const box = await locator.boundingBox();
-  return box ? Math.abs(box.width / box.height - expectedRatio) : Number.POSITIVE_INFINITY;
 }
 
 async function widthRatio(numerator: ReturnType<Page["locator"]>, denominator: ReturnType<Page["locator"]>) {
